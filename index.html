@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - App Precision Edition</title>
+    <title>Block Puzzle - Direct Snap Edition</title>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%);
@@ -104,7 +104,7 @@
             height: 42px;
             background-color: #ffffff;
             border-radius: 6px;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.15s;
         }
         .cell.filled {
             background: var(--block-gradient);
@@ -114,13 +114,11 @@
 
         .cell.preview-valid {
             background-color: #a5d6a7 !important;
-            box-shadow: 0 0 12px #43a047;
-            transform: scale(0.95);
+            box-shadow: inset 0 0 10px #43a047;
         }
         .cell.preview-invalid {
             background-color: #ef9a9a !important;
-            box-shadow: 0 0 15px #d32f2f;
-            transform: scale(0.95);
+            box-shadow: inset 0 0 10px #d32f2f;
         }
 
         #toolbox {
@@ -145,10 +143,6 @@
         }
         .shape-container {
             cursor: grab;
-            transition: transform 0.15s;
-        }
-        .shape-container:active {
-            cursor: grabbing;
         }
         .mini-cell {
             width: 18px;
@@ -472,7 +466,7 @@
             checkGameOver();
         }
 
-        // 🎯 ระบบคำนวณตำแหน่งแม่นยำระดับแอปเกม (App Precision Controller)
+        // 🎯 ระบบ Direct Snap : ลอยเหนือปลายนิ้วพอดีเป๊ะ และพรีวิวตรงช่องตาราง 100%
         function addDragAndDropEvents(element, pieceIndex) {
             let clone = null;
             const CELL_SIZE = 42;
@@ -510,7 +504,7 @@
                 });
 
                 document.body.appendChild(clone);
-                element.style.visibility = 'hidden'; // ซ่อนบล็อกตัวล่าง
+                element.style.visibility = 'hidden'; 
 
                 updateClonePosition(clientX, clientY);
 
@@ -534,9 +528,6 @@
 
             function onEnd(e) {
                 if (!clone) return;
-                const clientX = isTouchDevice ? e.changedTouches[0].clientX : e.clientX;
-                const clientY = isTouchDevice ? e.changedTouches[0].clientY : e.clientY;
-                
                 tryDropPiece();
 
                 clone.remove();
@@ -552,16 +543,14 @@
                 }
             }
 
-            // 🎯 ระยะยกบล็อก: คอมเมาส์ = ตรงกลางเมาส์เป๊ะ / มือถือ = ลอยเหนือปลายนิ้ว
+            // 🎯 ให้บล็อกลอยขึ้นเหนือปลายนิ้วขึ้นไปพอดี (ประมาณ 80px) ทำให้มองเห็นช่องที่จะวางชัดเจน ไม่โดนนิ้วบัง
             function updateClonePosition(x, y) {
                 const shape = currentPieces[pieceIndex];
-                const width = shape[0].length * (CELL_SIZE + CELL_GAP) - CELL_GAP;
-                const height = shape.length * (CELL_SIZE + CELL_GAP) - CELL_GAP;
-                
-                const offsetY = isTouchDevice ? 65 : (height / 2); // ในคอมเมาส์จับกลางบล็อกพอดี!
+                const width = shape[0].length * (CELL_SIZE + CELL_GAP);
+                const height = shape.length * (CELL_SIZE + CELL_GAP);
                 
                 clone.style.left = (x - width / 2) + 'px';
-                clone.style.top = (y - offsetY) + 'px';
+                clone.style.top = (y - height - 40) + 'px'; 
             }
 
             function checkHoverBoard() {
@@ -655,7 +644,7 @@
                 }
 
                 if (!placed) {
-                    element.style.visibility = 'visible'; // คืนค่าถ้าวางไม่ได้
+                    element.style.visibility = 'visible'; 
                 }
             }
 
@@ -670,13 +659,11 @@
             element.addEventListener('touchstart', onStart, { passive: false });
         }
 
-        // 🎯 คำนวณอิงจากพื้นที่บล็อกจริงเข้ากระดาน (Exact Bounding Box Snap)
         function getBoardPosFromCloneRect(cloneRect, shape) {
             const boardRect = boardElement.getBoundingClientRect();
             const CELL_SIZE_PLUS_GAP = 42 + 4;
             const PADDING = 8;
 
-            // ตำแหน่งขอบซ้ายและขอบบนของบล็อกเทียบกับกระดาน
             const relX = cloneRect.left - boardRect.left - PADDING;
             const relY = cloneRect.top - boardRect.top - PADDING;
 
@@ -686,7 +673,6 @@
             const shapeRows = shape.length;
             const shapeCols = shape[0].length;
 
-            // ตรวจสอบว่าลากมาอยู่ในบริเวณกระดานหรือไม่
             if (startR < -1 || startC < -1 || startR > BOARD_SIZE || startC > BOARD_SIZE) {
                 return null;
             }
