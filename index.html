@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - Color Frenzy Edition</title>
+    <title>Block Puzzle - App Precision Edition</title>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%);
@@ -262,7 +262,6 @@
     </div>
 
     <script>
-        // 🌈 ธีมสีสันที่จะสลับเปลี่ยนไปเรื่อยๆ เมื่อเคลียร์แถวสำเร็จ
         const PALETTES = [
             {
                 bg: 'linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%)',
@@ -394,14 +393,13 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore') || 0;
 
-        // 🎯 สุ่มเน้นบล็อกชิ้นเล็ก/เคลียร์ง่าย เพื่อให้เกิดคอมโบและเปลี่ยนสีบ่อยๆ
         const EASY_SHAPES = [
-            [[1]], [[1]], [[1]],                        // เดี่ยว
-            [[1, 1]], [[1], [1]],                       // 2 ช่อง
-            [[1, 1, 1]], [[1], [1], [1]],               // 3 ช่อง
-            [[1, 1], [1, 1]],                           // 2x2
-            [[1, 1, 1, 1]], [[1], [1], [1], [1]],       // 4 ช่องทรงตรง
-            [[1, 0], [1, 1]], [[1, 1, 1], [0, 1, 0]]     // ตัว L / ตัว T
+            [[1]], [[1]], [[1]],
+            [[1, 1]], [[1], [1]],
+            [[1, 1, 1]], [[1], [1], [1]],
+            [[1, 1], [1, 1]],
+            [[1, 1, 1, 1]], [[1], [1], [1], [1]],
+            [[1, 0], [1, 1]], [[1, 1, 1], [0, 1, 0]]
         ];
 
         let currentPieces = [null, null, null];
@@ -474,15 +472,19 @@
             checkGameOver();
         }
 
+        // 🎯 ระบบคำนวณตำแหน่งแม่นยำระดับแอปเกม (App Precision Controller)
         function addDragAndDropEvents(element, pieceIndex) {
             let clone = null;
             const CELL_SIZE = 42;
             const CELL_GAP = 4;
-            const PICKUP_OFFSET_Y = 60;
+            let isTouchDevice = false;
 
             function onStart(e) {
                 if (!currentPieces[pieceIndex]) return;
-                const touch = e.touches ? e.touches[0] : e;
+                isTouchDevice = !!e.touches;
+                const clientX = isTouchDevice ? e.touches[0].clientX : e.clientX;
+                const clientY = isTouchDevice ? e.touches[0].clientY : e.clientY;
+
                 playSound('drop');
 
                 clone = element.cloneNode(true);
@@ -508,47 +510,58 @@
                 });
 
                 document.body.appendChild(clone);
-                element.style.visibility = 'hidden'; // หายไปจากช่องล่าง
+                element.style.visibility = 'hidden'; // ซ่อนบล็อกตัวล่าง
 
-                updateClonePosition(touch.clientX, touch.clientY);
+                updateClonePosition(clientX, clientY);
 
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onEnd);
-                document.addEventListener('touchmove', onMove, { passive: false });
-                document.addEventListener('touchend', onEnd);
+                if (isTouchDevice) {
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onEnd);
+                } else {
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onEnd);
+                }
             }
 
             function onMove(e) {
                 if (!clone) return;
                 if (e.cancelable) e.preventDefault();
-                const touch = e.touches ? e.touches[0] : e;
-                updateClonePosition(touch.clientX, touch.clientY);
+                const clientX = isTouchDevice ? e.touches[0].clientX : e.clientX;
+                const clientY = isTouchDevice ? e.touches[0].clientY : e.clientY;
+                updateClonePosition(clientX, clientY);
                 checkHoverBoard();
             }
 
             function onEnd(e) {
                 if (!clone) return;
-                const touch = e.changedTouches ? e.changedTouches[0] : e;
+                const clientX = isTouchDevice ? e.changedTouches[0].clientX : e.clientX;
+                const clientY = isTouchDevice ? e.changedTouches[0].clientY : e.clientY;
                 
-                tryDropPiece(touch.clientX, touch.clientY);
+                tryDropPiece();
 
                 clone.remove();
                 clone = null;
                 clearPreview();
 
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onEnd);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend', onEnd);
+                if (isTouchDevice) {
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                } else {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+                }
             }
 
+            // 🎯 ระยะยกบล็อก: คอมเมาส์ = ตรงกลางเมาส์เป๊ะ / มือถือ = ลอยเหนือปลายนิ้ว
             function updateClonePosition(x, y) {
                 const shape = currentPieces[pieceIndex];
                 const width = shape[0].length * (CELL_SIZE + CELL_GAP) - CELL_GAP;
                 const height = shape.length * (CELL_SIZE + CELL_GAP) - CELL_GAP;
                 
+                const offsetY = isTouchDevice ? 65 : (height / 2); // ในคอมเมาส์จับกลางบล็อกพอดี!
+                
                 clone.style.left = (x - width / 2) + 'px';
-                clone.style.top = (y - height / 2 - PICKUP_OFFSET_Y) + 'px';
+                clone.style.top = (y - offsetY) + 'px';
             }
 
             function checkHoverBoard() {
@@ -556,10 +569,7 @@
                 if (!clone) return;
 
                 const cloneRect = clone.getBoundingClientRect();
-                const centerX = cloneRect.left + (cloneRect.width / 2);
-                const centerY = cloneRect.top + (cloneRect.height / 2);
-
-                const pos = getBoardPosFromScreen(centerX, centerY, currentPieces[pieceIndex]);
+                const pos = getBoardPosFromCloneRect(cloneRect, currentPieces[pieceIndex]);
                 if (!pos) return;
 
                 const { startR, startC } = pos;
@@ -590,12 +600,9 @@
                 });
             }
 
-            function tryDropPiece(endX, endY) {
+            function tryDropPiece() {
                 const cloneRect = clone.getBoundingClientRect();
-                const centerX = cloneRect.left + (cloneRect.width / 2);
-                const centerY = cloneRect.top + (cloneRect.height / 2);
-
-                const pos = getBoardPosFromScreen(centerX, centerY, currentPieces[pieceIndex]);
+                const pos = getBoardPosFromCloneRect(cloneRect, currentPieces[pieceIndex]);
                 const shape = currentPieces[pieceIndex];
 
                 let placed = false;
@@ -663,32 +670,26 @@
             element.addEventListener('touchstart', onStart, { passive: false });
         }
 
-        function getBoardPosFromScreen(screenX, screenY, shape) {
+        // 🎯 คำนวณอิงจากพื้นที่บล็อกจริงเข้ากระดาน (Exact Bounding Box Snap)
+        function getBoardPosFromCloneRect(cloneRect, shape) {
             const boardRect = boardElement.getBoundingClientRect();
-            
-            const extendedRect = {
-                top: boardRect.top - 60,
-                bottom: boardRect.bottom + 60,
-                left: boardRect.left - 60,
-                right: boardRect.right + 60
-            };
-
-            if (screenX < extendedRect.left || screenX > extendedRect.right || 
-                screenY < extendedRect.top || screenY > extendedRect.bottom) {
-                return null;
-            }
-
             const CELL_SIZE_PLUS_GAP = 42 + 4;
             const PADDING = 8;
 
-            const relX = screenX - boardRect.left - PADDING;
-            const relY = screenY - boardRect.top - PADDING;
+            // ตำแหน่งขอบซ้ายและขอบบนของบล็อกเทียบกับกระดาน
+            const relX = cloneRect.left - boardRect.left - PADDING;
+            const relY = cloneRect.top - boardRect.top - PADDING;
 
             let startC = Math.round(relX / CELL_SIZE_PLUS_GAP);
             let startR = Math.round(relY / CELL_SIZE_PLUS_GAP);
 
             const shapeRows = shape.length;
             const shapeCols = shape[0].length;
+
+            // ตรวจสอบว่าลากมาอยู่ในบริเวณกระดานหรือไม่
+            if (startR < -1 || startC < -1 || startR > BOARD_SIZE || startC > BOARD_SIZE) {
+                return null;
+            }
 
             if (startR < 0) startR = 0;
             if (startC < 0) startC = 0;
@@ -723,9 +724,7 @@
                 score += linesCleared * 100 * linesCleared;
                 scoreElement.innerText = score;
 
-                // 🌈 เปลี่ยนธีมสีทุกครั้งที่เคลียร์แถวได้!
                 changeThemeColor();
-                
                 drawBoard();
 
                 const isAllClear = board.every(row => row.every(val => val === 0));
