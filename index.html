@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - Smart Assist Edition</title>
+    <title>Block Puzzle - Ultra Snap Edition</title>
     <style>
         * {
             box-sizing: border-box;
@@ -320,22 +320,20 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore') || 0;
 
-        // 🟢 หมวดบล็อกปกติ และบล็อกชิ้นเล็กช่วยชีวิต (Assist Blocks)
         const NORMAL_SHAPES = [
-            [[1]],                                    // บล็อกเดี่ยว ช่วยอุดช่องว่าง
-            [[1, 1]],                                 // แนวนอน 2
-            [[1], [1]],                               // แนวตั้ง 2
-            [[1, 1], [1, 1]],                         // สี่เหลี่ยม 2x2
-            [[1, 1, 1]],                              // แนวนอน 3
-            [[1], [1], [1]],                          // แนวตั้ง 3
-            [[1, 1, 1, 1]],                           // แนวนอน 4
-            [[1], [1], [1], [1]],                     // แนวตั้ง 4
-            [[1, 0], [1, 1]],                         // ตัว L เล็ก
-            [[1, 1, 1], [0, 1, 0]],                   // ตัว T
-            [[1, 1, 0], [0, 1, 1]]                    // ตัว Z
+            [[1]],
+            [[1, 1]],
+            [[1], [1]],
+            [[1, 1], [1, 1]],
+            [[1, 1, 1]],
+            [[1], [1], [1]],
+            [[1, 1, 1, 1]],
+            [[1], [1], [1], [1]],
+            [[1, 0], [1, 1]],
+            [[1, 1, 1], [0, 1, 0]],
+            [[1, 1, 0], [0, 1, 1]]
         ];
 
-        // 🌟 ชิ้นส่วนบล็อกพิเศษขนาดเล็กสำหรับช่วยเคลียร์พื้นที่ (โอกาสออกสูงขึ้นเมื่อเริ่มแคบ)
         const HELPER_SHAPES = [
             [[1]], 
             [[1]], 
@@ -383,9 +381,7 @@
             }
         }
 
-        // 🧠 ระบบสุ่มบล็อกอัจฉริยะ (Smart Assist) ช่วยผู้เล่นเคลียร์พื้นที่
         function getSmartShape() {
-            // นับจำนวนช่องว่างที่เหลือบนกระดาน
             let emptyCount = 0;
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
@@ -393,8 +389,6 @@
                 }
             }
 
-            // ถ้าพื้นที่บนกระดานเหลือน้อยกว่า 25 ช่อง (เริ่มแคบ/วิกฤต) 
-            // ระบบจะเพิ่มโอกาสสุ่มบล็อกชิ้นเล็ก (Helper Shapes) ออกมาช่วยให้ผู้เล่นหาทางลงและเคลียร์แถวได้ง่ายขึ้น!
             if (emptyCount < 25 && Math.random() < 0.6) {
                 return HELPER_SHAPES[Math.floor(Math.random() * HELPER_SHAPES.length)];
             }
@@ -437,7 +431,7 @@
 
         function addDragAndDropEvents(element, pieceIndex) {
             let clone = null;
-            const TOUCH_OFFSET_Y = 85;
+            const TOUCH_OFFSET_Y = 75; // ระยะยกชดเชยที่ลงตัวที่สุดสำหรับทุกขนาดมือถือ
 
             function onStart(e) {
                 if (!currentPieces[pieceIndex]) return;
@@ -521,27 +515,32 @@
             }
         }
 
+        // 🎯 ระบบ Ultra-Snap : ขยายรัศมีดูดบล็อกให้กว้างและใจดีขึ้น ไม่ต้องเป๊ะ ก็วางลงติดชัวร์!
         function getTargetBoardPos(x, y, shape) {
-            const cells = boardElement.children;
-            if (!cells || cells.length === 0) return null;
-
             const boardRect = boardElement.getBoundingClientRect();
+            
+            // ขยายรัศมีการรับสัมผัสรอบกระดานอีก 40px ให้ดูดเข้าตารางทันที
+            if (x < boardRect.left - 40 || x > boardRect.right + 40 || 
+                y < boardRect.top - 40 || y > boardRect.bottom + 40) {
+                return null;
+            }
+
             const cellSize = 42;
             const gap = 5;
+            const padding = 10;
 
-            const relX = x - boardRect.left;
-            const relY = y - boardRect.top;
+            const relX = x - boardRect.left - padding;
+            const relY = y - boardRect.top - padding;
 
-            let startC = Math.floor((relX + 10) / (cellSize + gap));
-            let startR = Math.floor((relY + 10) / (cellSize + gap));
+            let startC = Math.round(relX / (cellSize + gap));
+            let startR = Math.round(relY / (cellSize + gap));
 
             const shapeRows = shape.length;
             const shapeCols = shape[0].length;
 
-            if (startR < 0 || startC < 0 || startR >= BOARD_SIZE || startC >= BOARD_SIZE) {
-                return null;
-            }
-
+            // บังคับล็อกให้อยู่ในขอบกระดานเสมอ ไม่ให้หลุดขอบ
+            if (startR < 0) startR = 0;
+            if (startC < 0) startC = 0;
             if (startR + shapeRows > BOARD_SIZE) {
                 startR = BOARD_SIZE - shapeRows;
             }
@@ -567,13 +566,9 @@
                     if (shape[r][c] === 1) {
                         const targetR = startR + r;
                         const targetC = startC + c;
-                        if (targetR >= BOARD_SIZE || targetC >= BOARD_SIZE) {
-                            canPlace = false;
-                        } else {
-                            const index = targetR * BOARD_SIZE + targetC;
-                            cellsToPreview.push(index);
-                            if (board[targetR][targetC] === 1) canPlace = false;
-                        }
+                        const index = targetR * BOARD_SIZE + targetC;
+                        cellsToPreview.push(index);
+                        if (board[targetR][targetC] === 1) canPlace = false;
                     }
                 }
             }
@@ -602,7 +597,7 @@
                     if (shape[r][c] === 1) {
                         const targetR = startR + r;
                         const targetC = startC + c;
-                        if (targetR >= BOARD_SIZE || targetC >= BOARD_SIZE || board[targetR][targetC] === 1) {
+                        if (board[targetR][targetC] === 1) {
                             canPlace = false;
                         }
                     }
