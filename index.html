@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - Premium Edition</title>
+    <title>Block Puzzle - Color Frenzy Edition</title>
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%);
+            --board-bg: #f8bbd0;
+            --block-gradient: linear-gradient(135deg, #ff4081 0%, #ec407a 100%);
+            --block-border: #f48fb1;
+            --mini-gradient: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
+            --primary-color: #d81b60;
+            --score-color: #ad1457;
+        }
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
         body {
             font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            background: var(--bg-gradient);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,6 +31,7 @@
             user-select: none;
             touch-action: none;
             overflow: hidden;
+            transition: background 0.8s ease;
         }
 
         #top-panel {
@@ -35,29 +46,32 @@
         }
         .info-card {
             background: rgba(255, 255, 255, 0.95);
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            font-size: 15px;
             font-weight: bold;
-            color: #1565c0;
+            color: var(--score-color);
+            transition: color 0.5s ease;
         }
 
         h1 {
-            color: #1e88e5;
-            margin: 0 0 10px 0;
-            font-size: 32px;
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            font-size: 30px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: color 0.5s ease;
         }
         #score-board {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
-            color: #0d47a1;
-            margin-bottom: 20px;
+            color: var(--score-color);
+            margin-bottom: 15px;
             background: #ffffff;
-            padding: 8px 30px;
+            padding: 6px 26px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(13, 71, 161, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: color 0.5s ease;
         }
 
         #board-wrapper {
@@ -69,12 +83,12 @@
             grid-template-columns: repeat(8, 42px);
             grid-template-rows: repeat(8, 42px);
             gap: 4px;
-            background-color: #90caf9;
+            background-color: var(--board-bg);
             padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(13, 71, 161, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             border: 4px solid transparent;
-            transition: box-shadow 0.3s, border-color 0.3s;
+            transition: background-color 0.8s ease, box-shadow 0.3s;
         }
 
         #board.danger {
@@ -90,46 +104,44 @@
             height: 42px;
             background-color: #ffffff;
             border-radius: 6px;
-            transition: background-color 0.1s;
+            transition: background-color 0.2s, transform 0.1s;
         }
         .cell.filled {
-            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
-            box-shadow: 0 3px 6px rgba(13, 71, 161, 0.3);
-            border: 1px solid #1e88e5;
+            background: var(--block-gradient);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            border: 1px solid var(--block-border);
         }
-        /* สถานะพรีวิว: วางได้ */
+
         .cell.preview-valid {
             background-color: #a5d6a7 !important;
-            box-shadow: 0 0 15px #43a047;
+            box-shadow: 0 0 12px #43a047;
             transform: scale(0.95);
         }
-        /* สถานะพรีวิว: วางไม่ได้ */
         .cell.preview-invalid {
             background-color: #ef9a9a !important;
-            box-shadow: 0 0 20px #d32f2f;
+            box-shadow: 0 0 15px #d32f2f;
             transform: scale(0.95);
         }
 
         #toolbox {
             display: flex;
             gap: 15px;
-            margin-top: 25px;
-            min-height: 120px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
+            margin-top: 20px;
+            min-height: 110px;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 12px 25px;
             border-radius: 20px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
             justify-content: space-around;
             width: 90%;
-            max-width: 450px;
+            max-width: 420px;
         }
         .shape-slot {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* background: #f1f8e9; border: 2px dashed #a5d6a7; border-radius: 12px; */ /* สำหรับดีบั๊ก */
         }
         .shape-container {
             cursor: grab;
@@ -144,23 +156,22 @@
             border-radius: 4px;
         }
         .mini-cell.filled {
-            background: linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%);
-            box-shadow: 0 3px 6px rgba(94, 53, 177, 0.3);
+            background: var(--mini-gradient);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
 
-        /* เอฟเฟกต์ All Clear */
         #wow-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
             color: #ffb300;
-            font-size: 40px;
+            font-size: 36px;
             font-weight: 900;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 30px #ffea00;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 25px #ffea00;
             pointer-events: none;
             z-index: 100;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             opacity: 0;
             white-space: nowrap;
         }
@@ -169,13 +180,12 @@
             opacity: 1;
         }
 
-        /* Modal จบเกม */
         #game-over-modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(5px);
             z-index: 2000;
             justify-content: center;
@@ -183,38 +193,38 @@
         }
         .modal-content {
             background-color: #ffffff;
-            padding: 40px;
+            padding: 35px;
             border-radius: 24px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
             max-width: 85%;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
         .modal-content h2 {
-            color: #d32f2f;
-            font-size: 38px;
-            margin: 0 0 15px 0;
+            color: #d81b60;
+            font-size: 34px;
+            margin: 0 0 10px 0;
         }
         .modal-content p {
-            font-size: 20px;
-            color: #333;
-            margin: 10px 0;
+            font-size: 18px;
+            color: #444;
+            margin: 8px 0;
         }
         .modal-content button {
-            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            background: var(--block-gradient);
             color: white;
             border: none;
-            padding: 15px 35px;
-            font-size: 20px;
+            padding: 12px 32px;
+            font-size: 18px;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(13, 71, 161, 0.4);
-            margin-top: 25px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            margin-top: 18px;
             transition: transform 0.1s;
         }
         .modal-content button:active {
@@ -245,13 +255,77 @@
     <div id="game-over-modal">
         <div class="modal-content">
             <h2>GAME OVER 🎮</h2>
-            <p>คะแนนของคุณ: <strong id="final-score" style="color: #0d47a1; font-size: 28px;">0</strong></p>
-            <p id="new-high-score-text" style="color: #fbc02d; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
+            <p>คะแนนของคุณ: <strong id="final-score" style="color: #d81b60; font-size: 26px;">0</strong></p>
+            <p id="new-high-score-text" style="color: #ffb300; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
             <button onclick="restartGame()">เล่นใหม่อีกครั้ง 🔄</button>
         </div>
     </div>
 
     <script>
+        // 🌈 ธีมสีสันที่จะสลับเปลี่ยนไปเรื่อยๆ เมื่อเคลียร์แถวสำเร็จ
+        const PALETTES = [
+            {
+                bg: 'linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%)',
+                board: '#f8bbd0',
+                block: 'linear-gradient(135deg, #ff4081 0%, #ec407a 100%)',
+                border: '#f48fb1',
+                mini: 'linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%)',
+                primary: '#d81b60',
+                score: '#ad1457'
+            },
+            {
+                bg: 'linear-gradient(135deg, #e1f5fe 0%, #f0f4c3 100%)',
+                board: '#b3e5fc',
+                block: 'linear-gradient(135deg, #0288d1 0%, #26c6da 100%)',
+                border: '#81d4fa',
+                mini: 'linear-gradient(135deg, #26a69a 0%, #00897b 100%)',
+                primary: '#0277bd',
+                score: '#01579b'
+            },
+            {
+                bg: 'linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 100%)',
+                board: '#e1bee7',
+                block: 'linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%)',
+                border: '#ce93d8',
+                mini: 'linear-gradient(135deg, #5c6bc0 0%, #3f51b5 100%)',
+                primary: '#6a1b9a',
+                score: '#4a148c'
+            },
+            {
+                bg: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+                board: '#ffe0b2',
+                block: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
+                border: '#ffcc80',
+                mini: 'linear-gradient(135deg, #e64a19 0%, #d84315 100%)',
+                primary: '#e65100',
+                score: '#bf360c'
+            },
+            {
+                bg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)',
+                board: '#a5d6a7',
+                block: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)',
+                border: '#81c784',
+                mini: 'linear-gradient(135deg, #00796b 0%, #004d40 100%)',
+                primary: '#2e7d32',
+                score: '#1b5e20'
+            }
+        ];
+
+        let currentPaletteIndex = 0;
+
+        function changeThemeColor() {
+            currentPaletteIndex = (currentPaletteIndex + 1) % PALETTES.length;
+            const p = PALETTES[currentPaletteIndex];
+            
+            document.documentElement.style.setProperty('--bg-gradient', p.bg);
+            document.documentElement.style.setProperty('--board-bg', p.board);
+            document.documentElement.style.setProperty('--block-gradient', p.block);
+            document.documentElement.style.setProperty('--block-border', p.border);
+            document.documentElement.style.setProperty('--mini-gradient', p.mini);
+            document.documentElement.style.setProperty('--primary-color', p.primary);
+            document.documentElement.style.setProperty('--score-color', p.score);
+        }
+
         let audioCtx = null;
 
         function playSound(type) {
@@ -271,24 +345,25 @@
 
                 if (type === 'drop') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                    osc.frequency.setValueAtTime(450, now);
+                    osc.frequency.exponentialRampToValueAtTime(850, now + 0.08);
                     gainNode.gain.setValueAtTime(0.3, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
                     osc.start(now);
-                    osc.stop(now + 0.1);
+                    osc.stop(now + 0.08);
                 } 
                 else if (type === 'clear') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(500, now);
-                    osc.frequency.setValueAtTime(700, now + 0.08);
+                    osc.frequency.setValueAtTime(523, now);
+                    osc.frequency.setValueAtTime(659, now + 0.07);
+                    osc.frequency.setValueAtTime(783, now + 0.14);
                     gainNode.gain.setValueAtTime(0.4, now);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
                     osc.start(now);
                     osc.stop(now + 0.3);
                 }
                 else if (type === 'wow') {
-                    const notes = [523, 659, 784, 1046, 1318, 1568];
+                    const notes = [523, 659, 783, 1046, 1318, 1567];
                     notes.forEach((freq, idx) => {
                         const o = audioCtx.createOscillator();
                         const g = audioCtx.createGain();
@@ -304,7 +379,7 @@
                 }
                 else if (type === 'gameover') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(320, now);
                     osc.frequency.linearRampToValueAtTime(100, now + 0.5);
                     gainNode.gain.setValueAtTime(0.4, now);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
@@ -319,20 +394,14 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore') || 0;
 
-        const SHAPES = [
-            [[1]],                                    // 1x1
-            [[1, 1]],                                 // 2x1
-            [[1], [1]],                               // 1x2
-            [[1, 1], [1, 1]],                         // 2x2
-            [[1, 1, 1]],                              // 3x1
-            [[1], [1], [1]],                          // 1x3
-            [[1, 1, 1, 1]],                           // 4x1
-            [[1], [1], [1], [1]],                     // 1x4
-            [[1, 1, 1], [0, 1, 0]],                   // ตัว T
-            [[1, 0], [1, 1]],                         // ตัว L เล็ก
-            [[0, 1], [1, 1]],                         // ตัว J เล็ก
-            [[1, 1, 0], [0, 1, 1]],                   // ตัว Z
-            [[0, 1, 1], [1, 1, 0]]                    // ตัว S
+        // 🎯 สุ่มเน้นบล็อกชิ้นเล็ก/เคลียร์ง่าย เพื่อให้เกิดคอมโบและเปลี่ยนสีบ่อยๆ
+        const EASY_SHAPES = [
+            [[1]], [[1]], [[1]],                        // เดี่ยว
+            [[1, 1]], [[1], [1]],                       // 2 ช่อง
+            [[1, 1, 1]], [[1], [1], [1]],               // 3 ช่อง
+            [[1, 1], [1, 1]],                           // 2x2
+            [[1, 1, 1, 1]], [[1], [1], [1], [1]],       // 4 ช่องทรงตรง
+            [[1, 0], [1, 1]], [[1, 1, 1], [0, 1, 0]]     // ตัว L / ตัว T
         ];
 
         let currentPieces = [null, null, null];
@@ -340,7 +409,6 @@
         const boardElement = document.getElementById('board');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
-        const toolboxElement = document.getElementById('toolbox');
         const gameOverModal = document.getElementById('game-over-modal');
         const finalScoreElement = document.getElementById('final-score');
         const newHighScoreText = document.getElementById('new-high-score-text');
@@ -375,13 +443,12 @@
 
         function generateNewPieces() {
             for (let i = 0; i < 3; i++) {
-                const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+                const randomShape = EASY_SHAPES[Math.floor(Math.random() * EASY_SHAPES.length)];
                 currentPieces[i] = randomShape;
 
                 const shapeDiv = document.createElement('div');
                 shapeDiv.classList.add('shape-container');
                 shapeDiv.id = `piece-${i}`;
-                shapeDiv.dataset.pieceIndex = i;
 
                 const rows = randomShape.length;
                 const cols = randomShape[0].length;
@@ -407,26 +474,21 @@
             checkGameOver();
         }
 
-        // 🧠 ระบบ Premium Drag & Drop : ตัวจริงลอยติดนิ้ว ช่องว่าง หายไปเลย!
         function addDragAndDropEvents(element, pieceIndex) {
             let clone = null;
-            let currentX = 0;
-            let currentY = 0;
             const CELL_SIZE = 42;
             const CELL_GAP = 4;
-            const PICKUP_OFFSET_Y = 60; // ระยะบล็อกลอยเหนือปลายนิ้ว พอดีเป๊ะ
+            const PICKUP_OFFSET_Y = 60;
 
             function onStart(e) {
                 if (!currentPieces[pieceIndex]) return;
                 const touch = e.touches ? e.touches[0] : e;
-                playSound('drop'); // เสียงจิ้มโดน
+                playSound('drop');
 
-                // สร้างตัวโคลนสำหรับลาก
                 clone = element.cloneNode(true);
                 clone.style.position = 'fixed';
                 clone.style.zIndex = '1000';
                 clone.style.pointerEvents = 'none';
-                clone.style.transform = 'scale(1)'; 
                 
                 const shape = currentPieces[pieceIndex];
                 const rows = shape.length;
@@ -440,15 +502,13 @@
                     mc.style.height = `${CELL_SIZE}px`;
                     mc.style.borderRadius = '6px';
                     if (mc.classList.contains('filled')) {
-                        mc.style.background = 'linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%)';
-                        mc.style.boxShadow = '0 6px 15px rgba(0,0,0,0.3)';
+                        mc.style.background = getComputedStyle(document.documentElement).getPropertyValue('--mini-gradient');
+                        mc.style.boxShadow = '0 6px 15px rgba(0,0,0,0.25)';
                     }
                 });
 
                 document.body.appendChild(clone);
-                
-                // 🌟 หัวใจสำคัญ: เมื่อจิ้ม บล็อกจริงที่ช่องด้านล่างจะ "หายไป" (ซ่อน) ทันที!
-                element.style.visibility = 'hidden'; 
+                element.style.visibility = 'hidden'; // หายไปจากช่องล่าง
 
                 updateClonePosition(touch.clientX, touch.clientY);
 
@@ -491,7 +551,6 @@
                 clone.style.top = (y - height / 2 - PICKUP_OFFSET_Y) + 'px';
             }
 
-            // ฟังก์ชันพรีวิว: ดูว่าวางได้ไหม
             function checkHoverBoard() {
                 clearPreview();
                 if (!clone) return;
@@ -531,7 +590,6 @@
                 });
             }
 
-            // ฟังก์ชันพยายามวางบล็อก
             function tryDropPiece(endX, endY) {
                 const cloneRect = clone.getBoundingClientRect();
                 const centerX = cloneRect.left + (cloneRect.width / 2);
@@ -546,7 +604,6 @@
                     const { startR, startC } = pos;
                     let fits = true;
 
-                    // ตรวจสอบว่าวางได้จริงไหม
                     for (let r = 0; r < shape.length; r++) {
                         for (let c = 0; c < shape[0].length; c++) {
                             if (shape[r][c] === 1) {
@@ -576,14 +633,11 @@
                         scoreElement.innerText = score;
                         drawBoard();
 
-                        // 🌟 เมื่อวางสำเร็จ: ช่องด้านล่างว่างเปล่าไปเลยจริงๆ
                         currentPieces[pieceIndex] = null;
-                        const slot = document.getElementById(`slot-${pieceIndex}`);
-                        slot.innerHTML = ''; 
+                        document.getElementById(`slot-${pieceIndex}`).innerHTML = ''; 
 
                         checkAndClearLines();
                         
-                        // ถ้าว่างครบทั้ง 3 ช่อง ให้สุ่มชุดใหม่
                         if (currentPieces.every(p => p === null)) {
                             generateNewPieces();
                         } else {
@@ -594,8 +648,7 @@
                 }
 
                 if (!placed) {
-                    // 🌟 หัวใจสำคัญ: ถ้าวางไม่สำเร็จ บล็อกจริงที่ช่องด้านล่างต้อง "ปรากฏกลับมา" เหมือนเดิม!
-                    element.style.visibility = 'visible'; 
+                    element.style.visibility = 'visible'; // คืนค่าถ้าวางไม่ได้
                 }
             }
 
@@ -610,11 +663,9 @@
             element.addEventListener('touchstart', onStart, { passive: false });
         }
 
-        // 🎯 ฟังก์ชันคำนวณตำแหน่งลงตารางจากหน้าจอ (Super Snap : ดูดเข้าช่องง่ายมาก)
         function getBoardPosFromScreen(screenX, screenY, shape) {
             const boardRect = boardElement.getBoundingClientRect();
             
-            // ขยายรัศมีการรับสัมผัสรอบกระดานอีก 60px ให้ดูดเข้าตารางทันที วางง่ายขึ้นมาก
             const extendedRect = {
                 top: boardRect.top - 60,
                 bottom: boardRect.bottom + 60,
@@ -630,7 +681,6 @@
             const CELL_SIZE_PLUS_GAP = 42 + 4;
             const PADDING = 8;
 
-            // คำนวณหาช่อง (r, c) ที่ใกล้จุดกึ่งกลางบล็อกที่สุด
             const relX = screenX - boardRect.left - PADDING;
             const relY = screenY - boardRect.top - PADDING;
 
@@ -640,7 +690,6 @@
             const shapeRows = shape.length;
             const shapeCols = shape[0].length;
 
-            // บังคับไม่ให้หลุดขอบ
             if (startR < 0) startR = 0;
             if (startC < 0) startC = 0;
             if (startR + shapeRows > BOARD_SIZE) startR = BOARD_SIZE - shapeRows;
@@ -673,6 +722,10 @@
 
                 score += linesCleared * 100 * linesCleared;
                 scoreElement.innerText = score;
+
+                // 🌈 เปลี่ยนธีมสีทุกครั้งที่เคลียร์แถวได้!
+                changeThemeColor();
+                
                 drawBoard();
 
                 const isAllClear = board.every(row => row.every(val => val === 0));
