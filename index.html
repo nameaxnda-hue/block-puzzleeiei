@@ -98,19 +98,19 @@
             transition: all 0.3s ease;
         }
 
-        /* 🚨 กรอบแดงวิบวับเตือนภัยตอนใกล้ตาย เด่นชัดสะใจ! */
+        /* 🚨 กรอบแดงวิบวับเตือนภัยตอนสุ่มแล้ววางไม่ลง เด่นชัดสะใจ! */
         #board.danger {
             border-color: #ff3838 !important;
             animation: superDangerGlow 0.5s infinite alternate ease-in-out;
         }
         @keyframes superDangerGlow {
             0% {
-                box-shadow: 0 0 10px rgba(255, 56, 56, 0.4), inset 0 0 10px rgba(255, 56, 56, 0.3);
+                box-shadow: 0 0 15px rgba(255, 56, 56, 0.5), inset 0 0 10px rgba(255, 56, 56, 0.4);
                 filter: brightness(1);
             }
             100% {
-                box-shadow: 0 0 35px rgba(255, 56, 56, 0.9), inset 0 0 20px rgba(255, 56, 56, 0.7);
-                filter: brightness(1.2);
+                box-shadow: 0 0 45px rgba(255, 56, 56, 1), inset 0 0 25px rgba(255, 56, 56, 0.8);
+                filter: brightness(1.25);
             }
         }
 
@@ -405,6 +405,33 @@
             }
         }
 
+        // ตรวจสอบว่าบล็อกที่เหลืออยู่ สามารถวางลงบนกระดานได้หรือไม่
+        function canPlaceAnyPiece() {
+            for (let i = 0; i < currentPieces.length; i++) {
+                const shape = currentPieces[i];
+                if (!shape) continue;
+
+                for (let r = 0; r < BOARD_SIZE; r++) {
+                    for (let c = 0; c < BOARD_SIZE; c++) {
+                        let fits = true;
+                        for (let sr = 0; sr < shape.length; sr++) {
+                            for (let sc = 0; sc < shape[0].length; sc++) {
+                                if (shape[sr][sc] === 1) {
+                                    const tr = r + sr;
+                                    const tc = c + sc;
+                                    if (tr >= BOARD_SIZE || tc >= BOARD_SIZE || board[tr][tc] === 1) { 
+                                        fits = false; 
+                                    }
+                                }
+                            }
+                        }
+                        if (fits) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
@@ -454,7 +481,16 @@
 
                 addDragAndDropEvents(shapeDiv, i);
             }
-            checkGameOver();
+
+            // 🚨 เช็คทันทีหลังสุ่มบล็อกเสร็จ ถ้าไม่มีชิ้นไหนวางลงได้เลย ให้ขึ้นขอบแดงวิบวับทันที!
+            setTimeout(() => {
+                if (!canPlaceAnyPiece()) {
+                    boardElement.classList.add('danger');
+                } else {
+                    boardElement.classList.remove('danger');
+                }
+                checkGameOver();
+            }, 50);
         }
 
         function addDragAndDropEvents(element, pieceIndex) {
@@ -627,9 +663,17 @@
 
                         checkAndClearLines();
                         
+                        // ถ้าวางบล็อกหมดทุกชิ้นในชุดแล้ว สุ่มชุดใหม่
                         if (currentPieces.every(p => p === null)) {
+                            boardElement.classList.remove('danger'); // ล้างกรอบแดงตอนสุ่มชุดใหม่
                             generateSmartPieces(); 
                         } else {
+                            // ถ้ายังเหลือบล็อกบนถาด เช็คดูว่าชิ้นที่เหลือยังวางลงกระดานได้ไหม
+                            if (!canPlaceAnyPiece()) {
+                                boardElement.classList.add('danger');
+                            } else {
+                                boardElement.classList.remove('danger');
+                            }
                             checkGameOver();
                         }
                         placed = true;
@@ -718,63 +762,25 @@
             }
         }
 
-        function canPlaceAnyPiece() {
-            for (let i = 0; i < currentPieces.length; i++) {
-                const shape = currentPieces[i];
-                if (!shape) continue;
-
-                for (let r = 0; r < BOARD_SIZE; r++) {
-                    for (let c = 0; c < BOARD_SIZE; c++) {
-                        let fits = true;
-                        for (let sr = 0; sr < shape.length; sr++) {
-                            for (let sc = 0; sc < shape[0].length; sc++) {
-                                if (shape[sr][sc] === 1) {
-                                    const tr = r + sr;
-                                    const tc = c + sc;
-                                    if (tr >= BOARD_SIZE || tc >= BOARD_SIZE || board[tr][tc] === 1) { fits = false; }
-                                }
-                            }
-                        }
-                        if (fits) return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        // 🚨 ตรวจสอบสถานะวิกฤติแบบเรียลไทม์ (ถ้าบล็อกไหนวางไม่ลงเลย จะสั่งกระพริบแดงทันที)
         function checkGameOver() {
             setTimeout(() => {
                 const hasPiece = currentPieces.some(p => p !== null);
-                if (hasPiece) {
-                    if (!canPlaceAnyPiece()) {
-                        boardElement.classList.add('danger'); // เปิดกรอบแดงวิบวับ
-                        playSound('gameover');
+                if (hasPiece && !canPlaceAnyPiece()) {
+                    playSound('gameover');
 
-                        if (score > highScore) {
-                            highScore = score;
-                            localStorage.setItem('block_puzzle_highscore_crystal', highScore);
-                            highScoreElement.innerText = highScore;
-                            newHighScoreText.style.display = 'block';
-                        } else {
-                            newHighScoreText.style.display = 'none';
-                        }
-
-                        finalScoreElement.innerText = score;
-                        gameOverModal.style.display = 'flex';
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
+                        highScoreElement.innerText = highScore;
+                        newHighScoreText.style.display = 'block';
+                    } else {
+                        newHighScoreText.style.display = 'none';
                     }
+
+                    finalScoreElement.innerText = score;
+                    gameOverModal.style.display = 'flex';
                 }
             }, 100);
-        }
-
-        // ตรวจสอบเช็คขอบแดงเตือนภัยล่วงหน้าตอนเหลือบล็อกที่วางไม่ลงบางชิ้น
-        function updateDangerStatus() {
-            const hasPiece = currentPieces.some(p => p !== null);
-            if (hasPiece && !canPlaceAnyPiece()) {
-                boardElement.classList.add('danger');
-            } else {
-                boardElement.classList.remove('danger');
-            }
         }
 
         function restartGame() {
@@ -785,12 +791,10 @@
             scoreElement.innerText = score;
             drawBoard();
             generateSmartPieces();
-            updateDangerStatus();
         }
 
         initBoard();
         generateSmartPieces();
-        updateDangerStatus();
     </script>
 </body>
 </html>
