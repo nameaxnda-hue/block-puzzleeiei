@@ -115,10 +115,10 @@
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             border: 3px solid rgba(255, 255, 255, 0.25);
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, border-color 0.3s ease;
         }
 
-        /* 💥 เอฟเฟกต์กระดานสั่นเวลาทำคะแนนใหญ่ */
+        /* 💥 เอฟเฟกต์กระดานสั่น */
         @keyframes boardShake {
             0% { transform: translate(0, 0); }
             20% { transform: translate(-4px, 4px); }
@@ -131,14 +131,14 @@
             animation: boardShake 0.3s ease-in-out;
         }
 
-        /* 🚨 ขอบแดงวิบวับเด่นชัดตอนวิกฤติ */
+        /* 🚨 ขอบแดงวิบวับกระพริบเรียลไทม์ทันทีที่มีชิ้นส่วนวางไม่ได้! */
         #board.danger {
             border-color: #ff3838 !important;
-            animation: superDangerGlow 0.4s infinite alternate ease-in-out;
+            animation: superDangerGlow 0.4s infinite alternate ease-in-out !important;
         }
         @keyframes superDangerGlow {
             0% {
-                box-shadow: 0 0 15px rgba(255, 56, 56, 0.6), inset 0 0 10px rgba(255, 56, 56, 0.4);
+                box-shadow: 0 0 15px rgba(255, 56, 56, 0.8), inset 0 0 15px rgba(255, 56, 56, 0.6);
             }
             100% {
                 box-shadow: 0 0 50px rgba(255, 56, 56, 1), inset 0 0 30px rgba(255, 56, 56, 0.9);
@@ -154,7 +154,7 @@
             transition: background-color 0.15s;
         }
         
-        /* 🎨 สไตล์สีสันบล็อกหลากสีแบบคลาสสิก */
+        /* 🎨 สไตล์สีสันบล็อกหลากสี */
         .cell.color-0 { background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
         .cell.color-1 { background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
         .cell.color-2 { background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
@@ -196,6 +196,12 @@
             cursor: grab;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        /* ✨ แสดงสไตล์บล็อกโปร่งใสถ้าชิ้นนั้นวางบนกระดานไม่ได้ */
+        .shape-container.unplaceable {
+            opacity: 0.4;
+            filter: grayscale(80%);
+        }
+
         .mini-cell {
             width: 14px;
             height: 14px;
@@ -209,7 +215,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
 
-        /* ✨ ข้อความเอฟเฟกต์สุดว้าวตรงกลางจอ */
         #wow-text {
             position: absolute;
             top: 50%;
@@ -231,7 +236,6 @@
             opacity: 1;
         }
 
-        /* 🌟 เอฟเฟกต์อนุภาคประกายดาวพุ่งกระจาย */
         .particle {
             position: absolute;
             width: 8px;
@@ -294,7 +298,6 @@
 </head>
 <body>
 
-    <!-- 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม -->
     <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
     <div class="floating-bg-block" style="left: 25%; animation-duration: 14s; animation-delay: 3s;"></div>
     <div class="floating-bg-block" style="left: 50%; animation-duration: 11s; animation-delay: 1s;"></div>
@@ -474,30 +477,75 @@
             }
         }
 
-        function canPlaceAnyPiece() {
-            for (let i = 0; i < currentPieces.length; i++) {
-                const shape = currentPieces[i];
-                if (!shape) continue;
-
-                for (let r = 0; r < BOARD_SIZE; r++) {
-                    for (let c = 0; c < BOARD_SIZE; c++) {
-                        let fits = true;
-                        for (let sr = 0; sr < shape.length; sr++) {
-                            for (let sc = 0; sc < shape[0].length; sc++) {
-                                if (shape[sr][sc] === 1) {
-                                    const tr = r + sr;
-                                    const tc = c + sc;
-                                    if (tr >= BOARD_SIZE || tc >= BOARD_SIZE || board[tr][tc] === 1) { 
-                                        fits = false; 
-                                    }
+        // 🔍 ตรวจสอบว่าชิ้นส่วนรูปทรงนี้ สามารถวางลงบนกระดาน ณ จุดใดจุดหนึ่งได้หรือไม่
+        function canPlaceSpecificShape(shape) {
+            if (!shape) return false;
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    let fits = true;
+                    for (let sr = 0; sr < shape.length; sr++) {
+                        for (let sc = 0; sc < shape[0].length; sc++) {
+                            if (shape[sr][sc] === 1) {
+                                const tr = r + sr;
+                                const tc = c + sc;
+                                if (tr >= BOARD_SIZE || tc >= BOARD_SIZE || board[tr][tc] === 1) {
+                                    fits = false;
+                                    break;
                                 }
                             }
                         }
-                        if (fits) return true;
+                        if (!fits) break;
                     }
+                    if (fits) return true;
                 }
             }
             return false;
+        }
+
+        // 🚨 ระบบเช็กความปลอดภัยและขอบแดงวิบวับแบบเรียลไทม์
+        function updateDangerState() {
+            let activePieces = 0;
+            let unplaceableCount = 0;
+
+            for (let i = 0; i < 3; i++) {
+                const shape = currentPieces[i];
+                const pieceElement = document.getElementById(`piece-${i}`);
+                
+                if (shape) {
+                    activePieces++;
+                    const canPlace = canPlaceSpecificShape(shape);
+                    if (!canPlace) {
+                        unplaceableCount++;
+                        if (pieceElement) pieceElement.classList.add('unplaceable');
+                    } else {
+                        if (pieceElement) pieceElement.classList.remove('unplaceable');
+                    }
+                }
+            }
+
+            // ถ้ามีบล็อกในถาดวางไม่ได้ แม้แต่ชิ้นเดียว ให้เปิดขอบแดงเตือนภัยทันที!
+            if (activePieces > 0 && unplaceableCount > 0) {
+                boardElement.classList.add('danger');
+            } else {
+                boardElement.classList.remove('danger');
+            }
+
+            // ถ้าทุกชิ้นที่เหลืออยู่วางไม่ได้เลย ให้เกมโอเวอร์ทันที
+            if (activePieces > 0 && unplaceableCount === activePieces) {
+                setTimeout(() => {
+                    playSound('gameover');
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
+                        highScoreElement.innerText = highScore;
+                        newHighScoreText.style.display = 'block';
+                    } else {
+                        newHighScoreText.style.display = 'none';
+                    }
+                    finalScoreElement.innerText = score;
+                    gameOverModal.style.display = 'flex';
+                }, 600);
+            }
         }
 
         function generateSmartPieces() {
@@ -565,28 +613,7 @@
                 addDragAndDropEvents(shapeDiv, i);
             }
 
-            setTimeout(() => {
-                const hasPiece = currentPieces.some(p => p !== null);
-                if (hasPiece && !canPlaceAnyPiece()) {
-                    boardElement.classList.add('danger');
-                    
-                    setTimeout(() => {
-                        playSound('gameover');
-                        if (score > highScore) {
-                            highScore = score;
-                            localStorage.setItem('block_puzzle_highscore_crystal', highScore);
-                            highScoreElement.innerText = highScore;
-                            newHighScoreText.style.display = 'block';
-                        } else {
-                            newHighScoreText.style.display = 'none';
-                        }
-                        finalScoreElement.innerText = score;
-                        gameOverModal.style.display = 'flex';
-                    }, 600);
-                } else {
-                    boardElement.classList.remove('danger');
-                }
-            }, 50);
+            setTimeout(updateDangerState, 50);
         }
 
         function addDragAndDropEvents(element, pieceIndex) {
@@ -608,6 +635,7 @@
                 clone.style.position = 'fixed';
                 clone.style.zIndex = '1000';
                 clone.style.pointerEvents = 'none';
+                clone.classList.remove('unplaceable');
                 
                 const shape = currentPieces[pieceIndex];
                 const pieceColor = currentPieceColors[pieceIndex];
@@ -764,31 +792,12 @@
                         currentPieces[pieceIndex] = null;
                         document.getElementById(`slot-${pieceIndex}`).innerHTML = ''; 
 
-                        // ตรวจสอบการเคลียร์แถว พร้อมส่งพิกัดไปทำเอฟเฟกต์ระเบิดดาว
                         checkAndClearLines(cloneRect.left + (shape[0].length * CELL_SIZE) / 2, cloneRect.top + (shape.length * CELL_SIZE) / 2);
                         
                         if (currentPieces.every(p => p === null)) {
-                            boardElement.classList.remove('danger');
                             generateSmartPieces(); 
                         } else {
-                            if (!canPlaceAnyPiece()) {
-                                boardElement.classList.add('danger');
-                                setTimeout(() => {
-                                    playSound('gameover');
-                                    if (score > highScore) {
-                                        highScore = score;
-                                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
-                                        highScoreElement.innerText = highScore;
-                                        newHighScoreText.style.display = 'block';
-                                    } else {
-                                        newHighScoreText.style.display = 'none';
-                                    }
-                                    finalScoreElement.innerText = score;
-                                    gameOverModal.style.display = 'flex';
-                                }, 600);
-                            } else {
-                                boardElement.classList.remove('danger');
-                            }
+                            updateDangerState();
                         }
                         placed = true;
                     }
@@ -836,7 +845,6 @@
             return { startR, startC };
         }
 
-        // ✨ ฟังก์ชันสร้างละอองดาวกระจาย (Particle Explosion)
         function createExplosionAt(x, y) {
             for (let i = 0; i < 15; i++) {
                 const p = document.createElement('div');
@@ -899,7 +907,6 @@
                     }
                 });
 
-                // คำนวณคะแนนเบิ้ลโบนัสคอมโบ
                 score += linesCleared * 100 * comboStreak;
                 scoreElement.innerText = score;
                 drawBoard();
