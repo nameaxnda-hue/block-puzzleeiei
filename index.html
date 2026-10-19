@@ -32,7 +32,7 @@
             padding: 10px;
         }
 
-        /* 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม 100% */
+        /* 🌟 เอฟเฟกต์บล็อกลอยพุ่งขึ้นมาจากล่างขึ้นบนแบบดั้งเดิม */
         .floating-bg-block {
             position: absolute;
             width: 45px;
@@ -270,7 +270,7 @@
 </head>
 <body>
 
-    <!-- 🌟 บล็อกลอยพุ่งขึ้นจากด้านล่างแบบดั้งเดิม -->
+    <!-- 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม -->
     <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
     <div class="floating-bg-block" style="left: 25%; animation-duration: 14s; animation-delay: 3s;"></div>
     <div class="floating-bg-block" style="left: 50%; animation-duration: 11s; animation-delay: 1s;"></div>
@@ -309,17 +309,23 @@
     <script>
         let audioCtx = null;
 
+        // 🎵 ฟังก์ชันปลุกเสียงรองรับมือถือและคอมพิวเตอร์แบบทนทานพิเศษ
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContextClass();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {}
         }
 
-        window.addEventListener('touchstart', initAudio, { once: true });
-        window.addEventListener('mousedown', initAudio, { once: true });
+        // ดักจับการสัมผัสหน้าจอทุกรูปแบบเพื่อปลดล็อกเสียงบนมือถือทันที
+        ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, initAudio, { once: true, passive: true });
+        });
 
         function playSound(type) {
             try {
@@ -384,28 +390,21 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
 
-        // 🧩 คลังบล็อกสไตล์ Block Blast (เน้นตัว L, ตัว J, บล็อกยาว, 3x3 และตัดบล็อกจิ๋ว 1 ช่องออกเพื่อความสมจริง)
         const BLOCK_BLAST_SHAPES = [
-            // 1. บล็อกคู่แนวนอน/แนวตั้ง
             [[1, 1]], 
             [[1], [1]], 
-            // 2. บล็อก 3 ช่อง
             [[1, 1, 1]], 
             [[1], [1], [1]], 
-            // 3. สี่เหลี่ยมจัตุรัส 2x2 และ 3x3
             [[1, 1], [1, 1]], 
             [[1, 1, 1], [1, 1, 1], [1, 1, 1]], 
-            // 4. บล็อกยาว 4-5 ช่อง
             [[1, 1, 1, 1]], [[1], [1], [1], [1]], 
             [[1, 1, 1, 1, 1]], [[1], [1], [1], [1], [1]], 
-            // 5. ตัว L และตัว J ยอดฮิต (รวมถึงตัว L กลับหัวแบบที่ชอบ)
-            [[1, 0], [1, 0], [1, 1]], // L ยาว
-            [[0, 1], [0, 1], [1, 1]], // J ยาว
+            [[1, 0], [1, 0], [1, 1]], 
+            [[0, 1], [0, 1], [1, 1]], 
             [[1, 1], [1, 0], [1, 0]], 
             [[1, 1], [0, 1], [0, 1]],
             [[1, 0], [1, 1]], 
             [[0, 1], [1, 1]], 
-            // 6. บล็อกมุมฉาก / ตัว T / ซิกแซก
             [[1, 1, 1], [0, 1, 0]], 
             [[1, 1, 0], [0, 1, 1]], 
             [[0, 1, 1], [1, 1, 0]]
@@ -474,7 +473,6 @@
             return false;
         }
 
-        // 🎲 ระบบสุ่มบล็อกสไตล์ Block Blast (เล่นง่าย ช่วงแรกเน้นรูปทรงต่อสะดวก เคลียร์พื้นที่โล่งง่าย)
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
@@ -487,11 +485,9 @@
 
             for (let i = 0; i < 3; i++) {
                 if (freeSlots.length > 45) {
-                    // ช่วงกระดานโล่ง สุ่มบล็อกทรงมาตรฐานและตัว L / J สนุกๆ
                     const randIndex = Math.floor(Math.random() * BLOCK_BLAST_SHAPES.length);
                     placedPieces[i] = BLOCK_BLAST_SHAPES[randIndex];
                 } else {
-                    // ช่วงกระดานเริ่มแคบ เน้นสุ่มบล็อกขนาดเล็กและปานกลาง เพื่อให้ผู้เล่นแก้เกมเคลียร์แถวได้ง่ายขึ้น
                     const easyShapes = [0, 1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14, 15];
                     const chosenIdx = easyShapes[Math.floor(Math.random() * easyShapes.length)];
                     placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
@@ -528,7 +524,6 @@
                 addDragAndDropEvents(shapeDiv, i);
             }
 
-            // 🚨 ตรวจสอบภาวะวิกฤติทันทีหลังสุ่มบล็อกเสร็จ
             setTimeout(() => {
                 const hasPiece = currentPieces.some(p => p !== null);
                 if (hasPiece && !canPlaceAnyPiece()) {
@@ -561,6 +556,7 @@
 
             function onStart(e) {
                 if (!currentPieces[pieceIndex]) return;
+                initAudio(); // ปลุกเสียงทันทีที่เริ่มแตะลากบล็อก
                 isTouchDevice = !!e.touches;
                 const clientX = isTouchDevice ? e.touches[0].clientX : e.clientX;
                 const clientY = isTouchDevice ? e.touches[0].clientY : e.clientY;
