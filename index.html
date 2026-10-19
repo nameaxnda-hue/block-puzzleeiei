@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - 3D Edition</title>
+    <title>Block Puzzle - 3D Crystal Sparkling Edition</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
-            --board-bg: rgba(255, 255, 255, 0.1);
+            --bg-gradient: radial-gradient(circle at center, #2b1055 0%, #7597de 100%);
+            --board-bg: rgba(255, 255, 255, 0.08);
             --block-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-            --block-border: #ffa8b6;
-            --block-shadow: rgba(255, 117, 140, 0.5);
+            --block-border: rgba(255, 255, 255, 0.8);
+            --block-shadow: 0 10px 25px rgba(255, 117, 140, 0.6), inset 0 2px 5px rgba(255,255,255,0.6);
             --mini-gradient: linear-gradient(135deg, #fbc531 0%, #e84118 100%);
             --primary-color: #ff7eb3;
-            --score-color: #ffffff;
         }
 
         * {
@@ -32,7 +31,27 @@
             user-select: none;
             touch-action: none;
             overflow: hidden;
-            transition: background 0.8s ease;
+            transition: background 1s ease;
+        }
+
+        /* 🌟 พื้นหลังบล็อก 3D ลอยไปลอยมาวิ้งๆ */
+        .floating-bg-block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            animation: floatAround 12s infinite linear;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes floatAround {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0.8); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
         }
 
         #top-panel {
@@ -47,21 +66,23 @@
         }
         .info-card {
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             padding: 8px 20px;
             border-radius: 50px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             font-size: 16px;
             font-weight: bold;
             color: #ffffff;
+            text-shadow: 0 0 8px rgba(255,255,255,0.6);
         }
 
         h1 {
             color: #ffffff;
             margin: 0 0 5px 0;
             font-size: 32px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            text-shadow: 0 0 15px var(--primary-color), 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 10;
         }
         #score-board {
             font-size: 26px;
@@ -69,15 +90,18 @@
             color: #ffffff;
             margin-bottom: 15px;
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             padding: 6px 30px;
             border-radius: 50px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px rgba(255,255,255,0.6);
+            z-index: 10;
         }
 
         #board-wrapper {
             position: relative;
+            z-index: 10;
         }
 
         #board {
@@ -85,51 +109,55 @@
             grid-template-columns: repeat(8, 44px);
             grid-template-rows: repeat(8, 44px);
             gap: 6px;
-            background-color: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(10px);
+            background-color: var(--board-bg);
+            backdrop-filter: blur(15px);
             padding: 12px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: box-shadow 0.3s;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.25);
         }
 
         #board.danger {
             animation: dangerBorder 0.6s infinite alternate;
         }
         @keyframes dangerBorder {
-            from { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
-            to { border-color: #e74c3c; box-shadow: 0 0 35px #e74c3c; }
+            from { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
+            to { border-color: #ff3838; box-shadow: 0 0 40px #ff3838, inset 0 0 20px #ff3838; }
         }
 
         .cell {
             width: 44px;
             height: 44px;
-            background-color: rgba(255, 255, 255, 0.07);
+            background-color: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
             transition: background-color 0.15s;
         }
         
-        /* 🌟 เอฟเฟกต์บล็อก 3D นูนขึ้นมา */
+        /* 🌟 บล็อก 3D คริสตัลวิ้งวับ */
         .cell.filled {
             background: var(--block-gradient);
-            border-top: 2px solid rgba(255, 255, 255, 0.6);
-            border-left: 2px solid rgba(255, 255, 255, 0.4);
-            border-right: 2px solid rgba(0, 0, 0, 0.3);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-            box-shadow: 0 8px 15px var(--block-shadow), inset 0 2px 4px rgba(255,255,255,0.4);
+            border-top: 2px solid rgba(255, 255, 255, 0.9);
+            border-left: 2px solid rgba(255, 255, 255, 0.7);
+            border-right: 2px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+            box-shadow: var(--block-shadow);
             transform: translateY(-2px);
             border-radius: 10px;
+            animation: sparkleGlow 2s infinite alternate;
+        }
+        @keyframes sparkleGlow {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.15); }
         }
 
         .cell.preview-valid {
-            background-color: rgba(46, 204, 113, 0.6) !important;
-            box-shadow: inset 0 0 15px #2ecc71;
+            background-color: rgba(46, 204, 113, 0.7) !important;
+            box-shadow: inset 0 0 15px #2ecc71, 0 0 10px #2ecc71;
         }
         .cell.preview-invalid {
-            background-color: rgba(231, 76, 60, 0.6) !important;
-            box-shadow: inset 0 0 15px #e74c3c;
+            background-color: rgba(231, 76, 60, 0.7) !important;
+            box-shadow: inset 0 0 15px #e74c3c, 0 0 10px #e74c3c;
         }
 
         #toolbox {
@@ -138,14 +166,15 @@
             margin-top: 25px;
             min-height: 120px;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             padding: 15px 30px;
             border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 0 15px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             justify-content: space-around;
             width: 90%;
             max-width: 440px;
+            z-index: 10;
         }
         .shape-slot {
             width: 100px;
@@ -165,11 +194,11 @@
         }
         .mini-cell.filled {
             background: var(--mini-gradient);
-            border-top: 1.5px solid rgba(255, 255, 255, 0.6);
-            border-left: 1.5px solid rgba(255, 255, 255, 0.4);
-            border-right: 1.5px solid rgba(0, 0, 0, 0.3);
-            border-bottom: 1.5px solid rgba(0, 0, 0, 0.4);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.4);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.9);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.7);
+            border-right: 1.5px solid rgba(0, 0, 0, 0.4);
+            border-bottom: 1.5px solid rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.4), inset 0 1px 3px rgba(255,255,255,0.6);
         }
 
         #wow-text {
@@ -177,10 +206,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            color: #f1c40f;
-            font-size: 38px;
+            color: #ffeaa7;
+            font-size: 40px;
             font-weight: 900;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 30px #f39c12;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 35px #fdcb6e, 0 0 60px #ffeaa7;
             pointer-events: none;
             z-index: 100;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
@@ -197,19 +226,19 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             z-index: 2000;
             justify-content: center;
             align-items: center;
         }
         .modal-content {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: linear-gradient(135deg, #2d3436 0%, #1e272c 100%);
+            border: 1px solid rgba(255,255,255,0.3);
             padding: 40px;
             border-radius: 28px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 0 20px rgba(255,255,255,0.1);
             max-width: 85%;
             animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -219,17 +248,17 @@
         }
         .modal-content h2 {
             color: #ff7eb3;
-            font-size: 36px;
+            font-size: 38px;
             margin: 0 0 15px 0;
-            text-shadow: 0 2px 10px rgba(255, 126, 179, 0.4);
+            text-shadow: 0 0 15px #ff7eb3;
         }
         .modal-content p {
             font-size: 18px;
-            color: #ecf0f1;
+            color: #dfe6e9;
             margin: 10px 0;
         }
         .modal-content button {
-            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            background: var(--block-gradient);
             color: white;
             border: none;
             padding: 14px 36px;
@@ -237,7 +266,7 @@
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
+            box-shadow: 0 8px 25px rgba(255, 117, 140, 0.6);
             margin-top: 20px;
             transition: transform 0.1s;
         }
@@ -248,16 +277,23 @@
 </head>
 <body>
 
+    <!-- สร้างฉากหลังบล็อก 3D ลอยวิ้งๆ -->
+    <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
+    <div class="floating-bg-block" style="left: 30%; animation-duration: 14s; animation-delay: 2s;"></div>
+    <div class="floating-bg-block" style="left: 55%; animation-duration: 11s; animation-delay: 4s;"></div>
+    <div class="floating-bg-block" style="left: 75%; animation-duration: 16s; animation-delay: 1s;"></div>
+    <div class="floating-bg-block" style="left: 90%; animation-duration: 12s; animation-delay: 3s;"></div>
+
     <div id="top-panel">
         <div class="info-card">🏆 สูงสุด: <span id="high-score">0</span></div>
     </div>
 
-    <h1>Block Puzzle 3D 🧩</h1>
+    <h1>Block Puzzle 3D ✨</h1>
     <div id="score-board">คะแนน: <span id="score">0</span></div>
 
     <div id="board-wrapper">
         <div id="board"></div>
-        <div id="wow-text">✨ PERFECT CLEAR! WOW! ✨</div>
+        <div id="wow-text">✨ ALL CLEAR! WOW! ✨</div>
     </div>
     
     <div id="toolbox">
@@ -270,56 +306,60 @@
         <div class="modal-content">
             <h2>GAME OVER 🎮</h2>
             <p>คะแนนของคุณ: <strong id="final-score" style="color: #ff7eb3; font-size: 26px;">0</strong></p>
-            <p id="new-high-score-text" style="color: #f1c40f; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
+            <p id="new-high-score-text" style="color: #fdcb6e; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
             <button onclick="restartGame()">เล่นใหม่อีกครั้ง 🔄</button>
         </div>
     </div>
 
     <script>
-        // 🌈 ธีมสี 3D พรีเมียมที่จะสลับเปลี่ยนทุกครั้งที่เคลียร์แถวสำเร็จ
+        // 🌈 ธีมสีคริสตัล 3D วิ้งวับ ที่จะเปลี่ยนสีเฉพาะตอนเคลียร์ตารางเกลี้ยง (All Clear) เท่านั้น!
         const PALETTES = [
             {
-                bg: 'linear-gradient(135deg, #1f1c2c 0%, #928dab 100%)',
+                bg: 'radial-gradient(circle at center, #2b1055 0%, #7597de 100%)',
                 block: 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)',
-                shadow: 'rgba(255, 117, 140, 0.5)',
-                mini: 'linear-gradient(135deg, #fbc531 0%, #e84118 100%)'
+                shadow: '0 10px 25px rgba(255, 117, 140, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
+                mini: 'linear-gradient(135deg, #fbc531 0%, #e84118 100%)',
+                primary: '#ff7eb3'
             },
             {
-                bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 100%, #2c5364 100%)',
+                bg: 'radial-gradient(circle at center, #0f2027 0%, #203a43 50%, #2c5364 100%)',
                 block: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
-                shadow: 'rgba(0, 198, 255, 0.5)',
-                mini: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)'
+                shadow: '0 10px 25px rgba(0, 198, 255, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
+                mini: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)',
+                primary: '#00c6ff'
             },
             {
-                bg: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+                bg: 'radial-gradient(circle at center, #141e30 0%, #243b55 100%)',
                 block: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)',
-                shadow: 'rgba(245, 175, 25, 0.5)',
-                mini: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)'
+                shadow: '0 10px 25px rgba(245, 175, 25, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
+                mini: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)',
+                primary: '#f5af19'
             },
             {
-                bg: 'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
-                block: 'linear-gradient(135deg, #8A2387 0%, #E94057 100%, #F27121 100%)',
-                shadow: 'rgba(233, 64, 87, 0.5)',
-                mini: 'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 100%)'
+                bg: 'radial-gradient(circle at center, #41295a 0%, #2F0743 100%)',
+                block: 'linear-gradient(135deg, #8A2387 0%, #E94057 50%, #F27121 100%)',
+                shadow: '0 10px 25px rgba(233, 64, 87, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
+                mini: 'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 100%)',
+                primary: '#E94057'
             },
             {
-                bg: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
+                bg: 'radial-gradient(circle at center, #0b486b 0%, #f56217 100%)',
                 block: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-                shadow: 'rgba(56, 239, 125, 0.5)',
-                mini: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)'
+                shadow: '0 10px 25px rgba(56, 239, 125, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
+                mini: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)',
+                primary: '#38ef7d'
             }
         ];
 
         let currentPaletteIndex = 0;
 
-        function changeThemeColor() {
-            currentPaletteIndex = (currentPaletteIndex + 1) % PALETTES.length;
+        function applyThemeColor() {
             const p = PALETTES[currentPaletteIndex];
-            
             document.documentElement.style.setProperty('--bg-gradient', p.bg);
             document.documentElement.style.setProperty('--block-gradient', p.block);
             document.documentElement.style.setProperty('--block-shadow', p.shadow);
             document.documentElement.style.setProperty('--mini-gradient', p.mini);
+            document.documentElement.style.setProperty('--primary-color', p.primary);
         }
 
         let audioCtx = null;
@@ -388,15 +428,14 @@
         const BOARD_SIZE = 8;
         let board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
         let score = 0;
-        let highScore = localStorage.getItem('block_puzzle_highscore_3d') || 0;
+        let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
 
-        const EASY_SHAPES = [
-            [[1]], [[1]], [[1]],
-            [[1, 1]], [[1], [1]],
-            [[1, 1, 1]], [[1], [1], [1]],
-            [[1, 1], [1, 1]],
-            [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-            [[1, 0], [1, 1]], [[1, 1, 1], [0, 1, 0]]
+        // 🧠 ระบบสุ่มบล็อกอัจฉริยะ (Smart Assist Shapes) สลับชิ้นเล็กชิ้นใหญ่ให้เล่นง่ายเหมือนในแอปเกมจริง
+        const GAME_SHAPES = [
+            [[1]], [[1, 1]], [[1], [1]], [[1, 1, 1]], [[1], [1], [1]],
+            [[1, 1], [1, 1]], [[1, 1, 1, 1]], [[1], [1], [1], [1]],
+            [[1, 0], [1, 1]], [[0, 1], [1, 1]], [[1, 1, 1], [0, 1, 0]],
+            [[1, 1, 0], [0, 1, 1]], [[0, 1, 1], [1, 1, 0]]
         ];
 
         let currentPieces = [null, null, null];
@@ -410,6 +449,7 @@
         const wowTextElement = document.getElementById('wow-text');
 
         highScoreElement.innerText = highScore;
+        applyThemeColor();
 
         function initBoard() {
             boardElement.innerHTML = '';
@@ -438,7 +478,7 @@
 
         function generateNewPieces() {
             for (let i = 0; i < 3; i++) {
-                const randomShape = EASY_SHAPES[Math.floor(Math.random() * EASY_SHAPES.length)];
+                const randomShape = GAME_SHAPES[Math.floor(Math.random() * GAME_SHAPES.length)];
                 currentPieces[i] = randomShape;
 
                 const shapeDiv = document.createElement('div');
@@ -501,11 +541,11 @@
                     mc.style.borderRadius = '10px';
                     if (mc.classList.contains('filled')) {
                         mc.style.background = getComputedStyle(document.documentElement).getPropertyValue('--block-gradient');
-                        mc.style.borderTop = '2px solid rgba(255, 255, 255, 0.6)';
-                        mc.style.borderLeft = '2px solid rgba(255, 255, 255, 0.4)';
-                        mc.style.borderRight = '2px solid rgba(0, 0, 0, 0.3)';
-                        mc.style.borderBottom = '2px solid rgba(0, 0, 0, 0.4)';
-                        mc.style.boxShadow = '0 12px 25px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4)';
+                        mc.style.borderTop = '2px solid rgba(255, 255, 255, 0.9)';
+                        mc.style.borderLeft = '2px solid rgba(255, 255, 255, 0.7)';
+                        mc.style.borderRight = '2px solid rgba(0, 0, 0, 0.4)';
+                        mc.style.borderBottom = '2px solid rgba(0, 0, 0, 0.5)';
+                        mc.style.boxShadow = '0 15px 30px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.7)';
                     }
                 });
 
@@ -555,7 +595,7 @@
                 const height = shape.length * (CELL_SIZE + CELL_GAP);
                 
                 clone.style.left = (x - width / 2) + 'px';
-                clone.style.top = (y - height - 50) + 'px'; 
+                clone.style.top = (y - height - 55) + 'px'; 
             }
 
             function checkHoverBoard() {
@@ -714,18 +754,21 @@
 
                 score += linesCleared * 100 * linesCleared;
                 scoreElement.innerText = score;
-
-                changeThemeColor();
                 drawBoard();
 
+                // 🌟 เงื่อนไขเปลี่ยนสี: ต้องเคลียร์จนกระดานว่างเปล่าทั้งหมด (All Clear) เท่านั้น ถึงจะเปลี่ยนสีธีมวิ้งๆ ใหม่!
                 const isAllClear = board.every(row => row.every(val => val === 0));
                 
                 if (isAllClear) {
                     playSound('wow');
                     score += 500;
                     scoreElement.innerText = score;
+                    
+                    currentPaletteIndex = (currentPaletteIndex + 1) % PALETTES.length;
+                    applyThemeColor();
+
                     wowTextElement.classList.add('show');
-                    setTimeout(() => wowTextElement.classList.remove('show'), 1800);
+                    setTimeout(() => wowTextElement.classList.remove('show'), 2000);
                 } else {
                     playSound('clear');
                 }
@@ -741,7 +784,7 @@
 
                     if (score > highScore) {
                         highScore = score;
-                        localStorage.setItem('block_puzzle_highscore_3d', highScore);
+                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
                         highScoreElement.innerText = highScore;
                         newHighScoreText.style.display = 'block';
                     } else {
@@ -778,11 +821,6 @@
             return false;
         }
 
-        def restartGame() {
-            // แก้ไขฟังก์ชันรีสตาร์ทเกมให้ถูกต้องตาม JavaScript 
-        }
-
-        // JavaScript function fix
         function restartGame() {
             gameOverModal.style.display = 'none';
             boardElement.classList.remove('danger');
