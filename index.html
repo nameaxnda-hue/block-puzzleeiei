@@ -8,8 +8,6 @@
         :root {
             --bg-gradient: radial-gradient(circle at center, #2b1055 0%, #7597de 100%);
             --board-bg: rgba(255, 255, 255, 0.08);
-            --block-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-            --mini-gradient: linear-gradient(135deg, #fbc531 0%, #e84118 100%);
             --primary-color: #ff7eb3;
         }
 
@@ -144,16 +142,13 @@
             transition: background-color 0.15s;
         }
         
-        .cell.filled {
-            background: var(--block-gradient);
-            border-top: 2px solid rgba(255, 255, 255, 0.9);
-            border-left: 2px solid rgba(255, 255, 255, 0.7);
-            border-right: 2px solid rgba(0, 0, 0, 0.4);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.6);
-            transform: translateY(-2px);
-            border-radius: 8px;
-        }
+        /* 🎨 สไตล์สีสันบล็อกหลากสีแบบคลาสสิก (ส้ม, ชมพู, ฟ้า, เขียว, เหลือง, ม่วง) */
+        .cell.color-0 { background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
+        .cell.color-1 { background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
+        .cell.color-2 { background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
+        .cell.color-3 { background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
+        .cell.color-4 { background: linear-gradient(135deg, #feca57 0%, #ff9f43 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
+        .cell.color-5 { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
 
         .cell.preview-valid {
             background-color: rgba(46, 204, 113, 0.7) !important;
@@ -196,11 +191,9 @@
             background-color: rgba(255,255,255,0.1);
         }
         .mini-cell.filled {
-            background: var(--mini-gradient);
+            background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%);
             border-top: 1.5px solid rgba(255, 255, 255, 0.9);
             border-left: 1.5px solid rgba(255, 255, 255, 0.7);
-            border-right: 1.5px solid rgba(0, 0, 0, 0.4);
-            border-bottom: 1.5px solid rgba(0, 0, 0, 0.5);
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
 
@@ -255,7 +248,7 @@
             margin: 8px 0;
         }
         .modal-content button {
-            background: var(--block-gradient);
+            background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -263,7 +256,7 @@
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(255, 117, 140, 0.6);
+            box-shadow: 0 8px 25px rgba(255, 159, 67, 0.6);
             margin-top: 15px;
         }
     </style>
@@ -300,7 +293,7 @@
     <div id="game-over-modal">
         <div class="modal-content">
             <h2>GAME OVER 🎮</h2>
-            <p>คะแนนของคุณ: <strong id="final-score" style="color: #ff7eb3; font-size: 24px;">0</strong></p>
+            <p>คะแนนของคุณ: <strong id="final-score" style="color: #ff9f43; font-size: 24px;">0</strong></p>
             <p id="new-high-score-text" style="color: #fdcb6e; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
             <button onclick="restartGame()">เล่นใหม่อีกครั้ง 🔄</button>
         </div>
@@ -385,6 +378,8 @@
 
         const BOARD_SIZE = 8;
         let board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
+        // เก็บข้อมูลสีของแต่ละช่องบนกระดาน (0 คือว่าง, 1-6 คือรหัสสี)
+        let boardColors = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
 
@@ -409,6 +404,8 @@
         ];
 
         let currentPieces = [null, null, null];
+        // เก็บสีประจำตัวของบล็อกแต่ละชิ้นในถาด
+        let currentPieceColors = [0, 0, 0];
 
         const boardElement = document.getElementById('board');
         const scoreElement = document.getElementById('score');
@@ -436,10 +433,10 @@
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
                     const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.className = 'cell'; // รีเซ็ตคลาสเดิม
                     if (board[r][c] === 1) {
                         cell.classList.add('filled');
-                    } else {
-                        cell.classList.remove('filled');
+                        cell.classList.add(`color-${boardColors[r][c]}`);
                     }
                 }
             }
@@ -490,11 +487,14 @@
                     const chosenIdx = easyShapes[Math.floor(Math.random() * easyShapes.length)];
                     placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
                 }
+                // สุ่มสีให้บล็อกชุดนี้ (0 ถึง 5)
+                currentPieceColors[i] = Math.floor(Math.random() * 6);
             }
 
             for (let i = 0; i < 3; i++) {
                 const shape = placedPieces[i];
                 currentPieces[i] = shape;
+                const pieceColor = currentPieceColors[i];
 
                 const shapeDiv = document.createElement('div');
                 shapeDiv.classList.add('shape-container');
@@ -510,7 +510,16 @@
                     row.forEach(val => {
                         const mCell = document.createElement('div');
                         mCell.classList.add('mini-cell');
-                        if (val === 1) mCell.classList.add('filled');
+                        if (val === 1) {
+                            mCell.classList.add('filled');
+                            // ใส่สีสันตามชิ้นนั้นๆ
+                            if (pieceColor === 0) mCell.style.background = 'linear-gradient(135deg, #ff9f43 0%, #ff5252 100%)';
+                            else if (pieceColor === 1) mCell.style.background = 'linear-gradient(135deg, #ff6b81 0%, #ff4757 100%)';
+                            else if (pieceColor === 2) mCell.style.background = 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
+                            else if (pieceColor === 3) mCell.style.background = 'linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%)';
+                            else if (pieceColor === 4) mCell.style.background = 'linear-gradient(135deg, #feca57 0%, #ff9f43 100%)';
+                            else if (pieceColor === 5) mCell.style.background = 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)';
+                        }
                         shapeDiv.appendChild(mCell);
                     });
                 });
@@ -567,6 +576,7 @@
                 clone.style.pointerEvents = 'none';
                 
                 const shape = currentPieces[pieceIndex];
+                const pieceColor = currentPieceColors[pieceIndex];
                 const rows = shape.length;
                 const cols = shape[0].length;
                 clone.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
@@ -578,11 +588,14 @@
                     mc.style.height = `${CELL_SIZE}px`;
                     mc.style.borderRadius = '8px';
                     if (mc.classList.contains('filled')) {
-                        mc.style.background = 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)';
+                        if (pieceColor === 0) mc.style.background = 'linear-gradient(135deg, #ff9f43 0%, #ff5252 100%)';
+                        else if (pieceColor === 1) mc.style.background = 'linear-gradient(135deg, #ff6b81 0%, #ff4757 100%)';
+                        else if (pieceColor === 2) mc.style.background = 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
+                        else if (pieceColor === 3) mc.style.background = 'linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%)';
+                        else if (pieceColor === 4) mc.style.background = 'linear-gradient(135deg, #feca57 0%, #ff9f43 100%)';
+                        else if (pieceColor === 5) mc.style.background = 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)';
                         mc.style.borderTop = '2px solid rgba(255, 255, 255, 0.9)';
                         mc.style.borderLeft = '2px solid rgba(255, 255, 255, 0.7)';
-                        mc.style.borderRight = '2px solid rgba(0, 0, 0, 0.4)';
-                        mc.style.borderBottom = '2px solid rgba(0, 0, 0, 0.5)';
                         mc.style.boxShadow = '0 15px 30px rgba(0,0,0,0.6)';
                     }
                 });
@@ -676,6 +689,7 @@
                 const cloneRect = clone.getBoundingClientRect();
                 const pos = getBoardPosFromCloneRect(cloneRect, currentPieces[pieceIndex]);
                 const shape = currentPieces[pieceIndex];
+                const pieceColor = currentPieceColors[pieceIndex];
 
                 let placed = false;
 
@@ -703,6 +717,7 @@
                             for (let c = 0; c < shape[0].length; c++) {
                                 if (shape[r][c] === 1) {
                                     board[startR + r][startC + c] = 1;
+                                    boardColors[startR + r][startC + c] = pieceColor; // บันทึกสีลงบนตาราง
                                     placedBlocks++;
                                 }
                             }
@@ -805,8 +820,16 @@
             const linesCleared = rowsToClear.length + colsToClear.length;
 
             if (linesCleared > 0) {
-                rowsToClear.forEach(r => { board[r] = Array(BOARD_SIZE).fill(0); });
-                colsToClear.forEach(c => { for (let r = 0; r < BOARD_SIZE; r++) board[r][c] = 0; });
+                rowsToClear.forEach(r => { 
+                    board[r] = Array(BOARD_SIZE).fill(0); 
+                    boardColors[r] = Array(BOARD_SIZE).fill(0);
+                });
+                colsToClear.forEach(c => { 
+                    for (let r = 0; r < BOARD_SIZE; r++) {
+                        board[r][c] = 0; 
+                        boardColors[r][c] = 0;
+                    }
+                });
 
                 score += linesCleared * 100 * linesCleared;
                 scoreElement.innerText = score;
@@ -830,13 +853,13 @@
             gameOverModal.style.display = 'none';
             boardElement.classList.remove('danger');
             board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
+            boardColors = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
             score = 0;
             scoreElement.innerText = score;
             drawBoard();
             generateSmartPieces();
         }
 
-        // 🚀 สั่งเริ่มต้นสร้างกระดานและสุ่มบล็อก 3 ชิ้นแรกให้พร้อมเล่นทันทีตั้งแต่เปิดเว็บ!
         initBoard();
         generateSmartPieces();
     </script>
