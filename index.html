@@ -142,7 +142,7 @@
             transition: background-color 0.15s;
         }
         
-        /* 🎨 สไตล์สีสันบล็อกหลากสีแบบคลาสสิก (ส้ม, ชมพู, ฟ้า, เขียว, เหลือง, ม่วง) */
+        /* 🎨 สไตล์สีสันบล็อกหลากสีแบบคลาสสิก */
         .cell.color-0 { background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
         .cell.color-1 { background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
         .cell.color-2 { background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%); border-top: 2px solid rgba(255,255,255,0.8); border-left: 2px solid rgba(255,255,255,0.6); box-shadow: 0 4px 10px rgba(0,0,0,0.3); border-radius: 8px; }
@@ -378,7 +378,6 @@
 
         const BOARD_SIZE = 8;
         let board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
-        // เก็บข้อมูลสีของแต่ละช่องบนกระดาน (0 คือว่าง, 1-6 คือรหัสสี)
         let boardColors = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
@@ -404,7 +403,6 @@
         ];
 
         let currentPieces = [null, null, null];
-        // เก็บสีประจำตัวของบล็อกแต่ละชิ้นในถาด
         let currentPieceColors = [0, 0, 0];
 
         const boardElement = document.getElementById('board');
@@ -433,7 +431,7 @@
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
                     const cell = document.getElementById(`cell-${r}-${c}`);
-                    cell.className = 'cell'; // รีเซ็ตคลาสเดิม
+                    cell.className = 'cell';
                     if (board[r][c] === 1) {
                         cell.classList.add('filled');
                         cell.classList.add(`color-${boardColors[r][c]}`);
@@ -468,26 +466,33 @@
             return false;
         }
 
+        // 🌟 ระบบสุ่มบล็อกอัจฉริยะ: ช่วงกระดานว่างโล่ง จะเน้นสุ่มบล็อกทรงง่ายๆ ที่ช่วยให้เคลียร์แถวและทำ All Clear ได้ทันที
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
-            const freeSlots = [];
+            let filledCount = 0;
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    if (board[r][c] === 0) freeSlots.push({r, c});
+                    if (board[r][c] === 1) filledCount++;
                 }
             }
 
             for (let i = 0; i < 3; i++) {
-                if (freeSlots.length > 45) {
+                if (filledCount < 15) {
+                    // ช่วงเริ่มเกมหรือกระดานยังโล่งมาก เน้นสุ่มบล็อกทรงคู่ แนวนอน/แนวตั้ง และสี่เหลี่ยม เพื่อให้วางต่อเติมแถวแล้วล้างกระดานเกลี้ยงเกลาได้ง่ายที่สุด
+                    const superEasyShapes = [0, 1, 2, 3, 4, 6, 7, 8, 9];
+                    const chosenIdx = superEasyShapes[Math.floor(Math.random() * superEasyShapes.length)];
+                    placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
+                } else if (filledCount < 35) {
+                    // ช่วงกลางเกม สุ่มบล็อกผสมทั้งตัว L และบล็อกกลางๆ
                     const randIndex = Math.floor(Math.random() * BLOCK_BLAST_SHAPES.length);
                     placedPieces[i] = BLOCK_BLAST_SHAPES[randIndex];
                 } else {
+                    // ช่วงท้ายกระดานเริ่มแคบ เน้นบล็อกขนาดเล็กและปานกลาง
                     const easyShapes = [0, 1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14, 15];
                     const chosenIdx = easyShapes[Math.floor(Math.random() * easyShapes.length)];
                     placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
                 }
-                // สุ่มสีให้บล็อกชุดนี้ (0 ถึง 5)
                 currentPieceColors[i] = Math.floor(Math.random() * 6);
             }
 
@@ -512,7 +517,6 @@
                         mCell.classList.add('mini-cell');
                         if (val === 1) {
                             mCell.classList.add('filled');
-                            // ใส่สีสันตามชิ้นนั้นๆ
                             if (pieceColor === 0) mCell.style.background = 'linear-gradient(135deg, #ff9f43 0%, #ff5252 100%)';
                             else if (pieceColor === 1) mCell.style.background = 'linear-gradient(135deg, #ff6b81 0%, #ff4757 100%)';
                             else if (pieceColor === 2) mCell.style.background = 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%)';
@@ -717,7 +721,7 @@
                             for (let c = 0; c < shape[0].length; c++) {
                                 if (shape[r][c] === 1) {
                                     board[startR + r][startC + c] = 1;
-                                    boardColors[startR + r][startC + c] = pieceColor; // บันทึกสีลงบนตาราง
+                                    boardColors[startR + r][startC + c] = pieceColor;
                                     placedBlocks++;
                                 }
                             }
