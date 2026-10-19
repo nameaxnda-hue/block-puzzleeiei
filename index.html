@@ -94,17 +94,24 @@
             padding: 10px;
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            transition: border-color 0.3s, box-shadow 0.3s;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
         }
 
-        /* 🚨 กรอบกระพริบแดงเตือนภัยตอนใกล้เกมโอเวอร์ กลับมาแล้ว! */
+        /* 🚨 กรอบแดงวิบวับเตือนภัยตอนใกล้ตาย เด่นชัดสะใจ! */
         #board.danger {
-            animation: dangerBorder 0.6s infinite alternate;
+            border-color: #ff3838 !important;
+            animation: superDangerGlow 0.5s infinite alternate ease-in-out;
         }
-        @keyframes dangerBorder {
-            from { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
-            to { border-color: #ff3838; box-shadow: 0 0 30px #ff3838, inset 0 0 15px #ff3838; }
+        @keyframes superDangerGlow {
+            0% {
+                box-shadow: 0 0 10px rgba(255, 56, 56, 0.4), inset 0 0 10px rgba(255, 56, 56, 0.3);
+                filter: brightness(1);
+            }
+            100% {
+                box-shadow: 0 0 35px rgba(255, 56, 56, 0.9), inset 0 0 20px rgba(255, 56, 56, 0.7);
+                filter: brightness(1.2);
+            }
         }
 
         .cell {
@@ -274,7 +281,6 @@
     <script>
         let audioCtx = null;
 
-        // 🎵 ฟังก์ชันเปิดเสียงรองรับมือถือและคอมพิวเตอร์แบบสมบูรณ์
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -284,7 +290,6 @@
             }
         }
 
-        // ปลดล็อกเสียงอัตโนมัติเมื่อแตะหน้าจอครั้งแรกบนมือถือ
         window.addEventListener('touchstart', initAudio, { once: true });
         window.addEventListener('mousedown', initAudio, { once: true });
 
@@ -737,12 +742,13 @@
             return false;
         }
 
+        // 🚨 ตรวจสอบสถานะวิกฤติแบบเรียลไทม์ (ถ้าบล็อกไหนวางไม่ลงเลย จะสั่งกระพริบแดงทันที)
         function checkGameOver() {
             setTimeout(() => {
                 const hasPiece = currentPieces.some(p => p !== null);
                 if (hasPiece) {
                     if (!canPlaceAnyPiece()) {
-                        boardElement.classList.add('danger'); // 🚨 เปิดกรอบกระพริบแดงเตือนภัย
+                        boardElement.classList.add('danger'); // เปิดกรอบแดงวิบวับ
                         playSound('gameover');
 
                         if (score > highScore) {
@@ -756,11 +762,19 @@
 
                         finalScoreElement.innerText = score;
                         gameOverModal.style.display = 'flex';
-                    } else {
-                        boardElement.classList.remove('danger');
                     }
                 }
             }, 100);
+        }
+
+        // ตรวจสอบเช็คขอบแดงเตือนภัยล่วงหน้าตอนเหลือบล็อกที่วางไม่ลงบางชิ้น
+        function updateDangerStatus() {
+            const hasPiece = currentPieces.some(p => p !== null);
+            if (hasPiece && !canPlaceAnyPiece()) {
+                boardElement.classList.add('danger');
+            } else {
+                boardElement.classList.remove('danger');
+            }
         }
 
         function restartGame() {
@@ -771,10 +785,12 @@
             scoreElement.innerText = score;
             drawBoard();
             generateSmartPieces();
+            updateDangerStatus();
         }
 
         initBoard();
         generateSmartPieces();
+        updateDangerStatus();
     </script>
 </body>
 </html>
