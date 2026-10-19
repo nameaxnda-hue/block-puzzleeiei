@@ -30,6 +30,27 @@
             touch-action: none;
             overflow: hidden;
             padding: 10px;
+            position: relative;
+        }
+
+        /* 🌟 บล็อก 3D ลอยดุ๊กดิ๊กฉากหลัง กลับมาแล้ว! */
+        .floating-bg-block {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+            animation: floatAround 12s infinite linear;
+            z-index: 1;
+            pointer-events: none;
+        }
+        @keyframes floatAround {
+            0% { transform: translateY(105vh) rotate(0deg) scale(0.8); opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
         }
 
         #game-wrapper {
@@ -39,6 +60,7 @@
             justify-content: center;
             max-width: 400px;
             width: 100%;
+            z-index: 10;
         }
 
         #top-panel {
@@ -98,7 +120,7 @@
             transition: all 0.3s ease;
         }
 
-        /* 🚨 ขอบแดงวิบวับเด่นชัดสะใจ บังคับแสดงผลแน่นอน! */
+        /* 🚨 ขอบแดงวิบวับเด่นชัดสะใจ */
         #board.danger {
             border-color: #ff3838 !important;
             animation: superDangerGlow 0.4s infinite alternate ease-in-out;
@@ -248,6 +270,13 @@
     </style>
 </head>
 <body>
+
+    <!-- 🌟 บล็อก 3D ลอยดุ๊กดิ๊กฉากหลังรอบๆ หน้าจอ -->
+    <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
+    <div class="floating-bg-block" style="left: 25%; animation-duration: 14s; animation-delay: 3s;"></div>
+    <div class="floating-bg-block" style="left: 50%; animation-duration: 11s; animation-delay: 1s;"></div>
+    <div class="floating-bg-block" style="left: 75%; animation-duration: 15s; animation-delay: 4s;"></div>
+    <div class="floating-bg-block" style="left: 90%; animation-duration: 13s; animation-delay: 2s;"></div>
 
     <div id="game-wrapper">
         <div id="top-panel">
@@ -481,13 +510,12 @@
                 addDragAndDropEvents(shapeDiv, i);
             }
 
-            // 🚨 เช็คทันทีหลังสุ่มเสร็จ ถ้าวางไม่ลง สั่งเปิดขอบแดงเตือนภัยทันทีก่อนเด้ง Game Over!
+            // 🚨 เช็คทันทีหลังสุ่มเสร็จ ถ้าวางไม่ลง สั่งเปิดขอบแดงเตือนภัยทันทีก่อนเด้ง Game Over
             setTimeout(() => {
                 const hasPiece = currentPieces.some(p => p !== null);
                 if (hasPiece && !canPlaceAnyPiece()) {
-                    boardElement.classList.add('danger'); // สั่งเปิดขอบแดงวิบวับค้างไว้ทันที!
+                    boardElement.classList.add('danger');
                     
-                    // หน่วงเวลา 0.6 วินาทีให้เห็นขอบแดงก่อน ค่อยเด้งหน้าต่าง Game Over
                     setTimeout(() => {
                         playSound('gameover');
                         if (score > highScore) {
