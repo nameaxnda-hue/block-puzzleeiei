@@ -32,7 +32,7 @@
             padding: 10px;
         }
 
-        /* 🌟 เอฟเฟกต์บล็อกลอยพุ่งขึ้นมาจากล่างขึ้นบนแบบดั้งเดิม */
+        /* 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม */
         .floating-bg-block {
             position: absolute;
             width: 45px;
@@ -309,7 +309,6 @@
     <script>
         let audioCtx = null;
 
-        // 🎵 ฟังก์ชันปลุกเสียงรองรับมือถือและคอมพิวเตอร์แบบทนทานพิเศษ
         function initAudio() {
             try {
                 if (!audioCtx) {
@@ -322,7 +321,6 @@
             } catch (e) {}
         }
 
-        // ดักจับการสัมผัสหน้าจอทุกรูปแบบเพื่อปลดล็อกเสียงบนมือถือทันที
         ['touchstart', 'touchend', 'mousedown', 'keydown'].forEach(evt => {
             window.addEventListener(evt, initAudio, { once: true, passive: true });
         });
@@ -556,7 +554,7 @@
 
             function onStart(e) {
                 if (!currentPieces[pieceIndex]) return;
-                initAudio(); // ปลุกเสียงทันทีที่เริ่มแตะลากบล็อก
+                initAudio();
                 isTouchDevice = !!e.touches;
                 const clientX = isTouchDevice ? e.touches[0].clientX : e.clientX;
                 const clientY = isTouchDevice ? e.touches[0].clientY : e.clientY;
@@ -838,6 +836,7 @@
             generateSmartPieces();
         }
 
+        // 🚀 สั่งเริ่มต้นสร้างกระดานและสุ่มบล็อก 3 ชิ้นแรกให้พร้อมเล่นทันทีตั้งแต่เปิดเว็บ!
         initBoard();
         generateSmartPieces();
     </script>
