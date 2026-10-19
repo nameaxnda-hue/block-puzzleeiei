@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle</title>
+    <title>Block Puzzle - Ultimate Edition</title>
     <style>
         :root {
             --bg-gradient: radial-gradient(circle at center, #2b1055 0%, #7597de 100%);
@@ -63,9 +63,10 @@
         #top-panel {
             width: 100%;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 5px;
+            padding: 0 5px;
         }
         .info-card {
             background: rgba(255, 255, 255, 0.15);
@@ -114,7 +115,20 @@
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             border: 3px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
+            transition: transform 0.1s ease;
+        }
+
+        /* 💥 เอฟเฟกต์กระดานสั่นเวลาทำคะแนนใหญ่ */
+        @keyframes boardShake {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-4px, 4px); }
+            40% { transform: translate(4px, -4px); }
+            60% { transform: translate(-3px, -2px); }
+            80% { transform: translate(3px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+        .shake {
+            animation: boardShake 0.3s ease-in-out;
         }
 
         /* 🚨 ขอบแดงวิบวับเด่นชัดตอนวิกฤติ */
@@ -125,11 +139,9 @@
         @keyframes superDangerGlow {
             0% {
                 box-shadow: 0 0 15px rgba(255, 56, 56, 0.6), inset 0 0 10px rgba(255, 56, 56, 0.4);
-                filter: brightness(1);
             }
             100% {
                 box-shadow: 0 0 50px rgba(255, 56, 56, 1), inset 0 0 30px rgba(255, 56, 56, 0.9);
-                filter: brightness(1.3);
             }
         }
 
@@ -197,13 +209,14 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         }
 
+        /* ✨ ข้อความเอฟเฟกต์สุดว้าวตรงกลางจอ */
         #wow-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
             color: #ffeaa7;
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 900;
             text-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 35px #fdcb6e;
             pointer-events: none;
@@ -211,10 +224,28 @@
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             opacity: 0;
             white-space: nowrap;
+            text-align: center;
         }
         #wow-text.show {
             transform: translate(-50%, -50%) scale(1);
             opacity: 1;
+        }
+
+        /* 🌟 เอฟเฟกต์อนุภาคประกายดาวพุ่งกระจาย */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 150;
+            box-shadow: 0 0 10px #ffeb3b;
+            animation: particleFly 0.6s ease-out forwards;
+        }
+        @keyframes particleFly {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
         }
 
         #game-over-modal {
@@ -272,6 +303,7 @@
 
     <div id="game-wrapper">
         <div id="top-panel">
+            <div class="info-card">🔥 คอมโบ: <span id="combo-streak">0</span>x</div>
             <div class="info-card">🏆 สูงสุด: <span id="high-score">0</span></div>
         </div>
 
@@ -381,6 +413,7 @@
         let boardColors = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
+        let comboStreak = 0;
 
         const BLOCK_BLAST_SHAPES = [
             [[1, 1]], 
@@ -408,6 +441,7 @@
         const boardElement = document.getElementById('board');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
+        const comboStreakElement = document.getElementById('combo-streak');
         const gameOverModal = document.getElementById('game-over-modal');
         const finalScoreElement = document.getElementById('final-score');
         const newHighScoreText = document.getElementById('new-high-score-text');
@@ -466,7 +500,6 @@
             return false;
         }
 
-        // 🌟 ระบบสุ่มบล็อกอัจฉริยะ: ช่วงกระดานว่างโล่ง จะเน้นสุ่มบล็อกทรงง่ายๆ ที่ช่วยให้เคลียร์แถวและทำ All Clear ได้ทันที
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
@@ -479,16 +512,13 @@
 
             for (let i = 0; i < 3; i++) {
                 if (filledCount < 15) {
-                    // ช่วงเริ่มเกมหรือกระดานยังโล่งมาก เน้นสุ่มบล็อกทรงคู่ แนวนอน/แนวตั้ง และสี่เหลี่ยม เพื่อให้วางต่อเติมแถวแล้วล้างกระดานเกลี้ยงเกลาได้ง่ายที่สุด
                     const superEasyShapes = [0, 1, 2, 3, 4, 6, 7, 8, 9];
                     const chosenIdx = superEasyShapes[Math.floor(Math.random() * superEasyShapes.length)];
                     placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
                 } else if (filledCount < 35) {
-                    // ช่วงกลางเกม สุ่มบล็อกผสมทั้งตัว L และบล็อกกลางๆ
                     const randIndex = Math.floor(Math.random() * BLOCK_BLAST_SHAPES.length);
                     placedPieces[i] = BLOCK_BLAST_SHAPES[randIndex];
                 } else {
-                    // ช่วงท้ายกระดานเริ่มแคบ เน้นบล็อกขนาดเล็กและปานกลาง
                     const easyShapes = [0, 1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14, 15];
                     const chosenIdx = easyShapes[Math.floor(Math.random() * easyShapes.length)];
                     placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
@@ -734,7 +764,8 @@
                         currentPieces[pieceIndex] = null;
                         document.getElementById(`slot-${pieceIndex}`).innerHTML = ''; 
 
-                        checkAndClearLines();
+                        // ตรวจสอบการเคลียร์แถว พร้อมส่งพิกัดไปทำเอฟเฟกต์ระเบิดดาว
+                        checkAndClearLines(cloneRect.left + (shape[0].length * CELL_SIZE) / 2, cloneRect.top + (shape.length * CELL_SIZE) / 2);
                         
                         if (currentPieces.every(p => p === null)) {
                             boardElement.classList.remove('danger');
@@ -805,7 +836,37 @@
             return { startR, startC };
         }
 
-        function checkAndClearLines() {
+        // ✨ ฟังก์ชันสร้างละอองดาวกระจาย (Particle Explosion)
+        function createExplosionAt(x, y) {
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 40 + Math.random() * 80;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+                
+                p.style.setProperty('--dx', dx + 'px');
+                p.style.setProperty('--dy', dy + 'px');
+                
+                const colors = ['#ffeb3b', '#ff4757', '#2ed573', '#70a1ff', '#ffa502', '#ff6b81'];
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.boxShadow = `0 0 10px ${p.style.background}`;
+
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        function triggerScreenShake() {
+            boardElement.classList.add('shake');
+            setTimeout(() => boardElement.classList.remove('shake'), 300);
+        }
+
+        function checkAndClearLines(dropX, dropY) {
             let rowsToClear = [];
             let colsToClear = [];
 
@@ -824,6 +885,9 @@
             const linesCleared = rowsToClear.length + colsToClear.length;
 
             if (linesCleared > 0) {
+                comboStreak++;
+                comboStreakElement.innerText = comboStreak;
+
                 rowsToClear.forEach(r => { 
                     board[r] = Array(BOARD_SIZE).fill(0); 
                     boardColors[r] = Array(BOARD_SIZE).fill(0);
@@ -835,21 +899,34 @@
                     }
                 });
 
-                score += linesCleared * 100 * linesCleared;
+                // คำนวณคะแนนเบิ้ลโบนัสคอมโบ
+                score += linesCleared * 100 * comboStreak;
                 scoreElement.innerText = score;
                 drawBoard();
+
+                createExplosionAt(dropX, dropY);
+                triggerScreenShake();
 
                 const isAllClear = board.every(row => row.every(val => val === 0));
                 
                 if (isAllClear) {
                     playSound('wow');
-                    score += 500;
+                    score += 500 * comboStreak;
                     scoreElement.innerText = score;
+                    wowTextElement.innerText = "✨ ALL CLEAR! +COMBO! ✨";
                     wowTextElement.classList.add('show');
                     setTimeout(() => wowTextElement.classList.remove('show'), 2000);
                 } else {
                     playSound('clear');
+                    if (linesCleared >= 2) {
+                        wowTextElement.innerText = `🔥 COMBO x${comboStreak}! AMAZING! 🔥`;
+                        wowTextElement.classList.add('show');
+                        setTimeout(() => wowTextElement.classList.remove('show'), 1500);
+                    }
                 }
+            } else {
+                comboStreak = 0;
+                comboStreakElement.innerText = comboStreak;
             }
         }
 
@@ -859,7 +936,9 @@
             board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
             boardColors = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
             score = 0;
+            comboStreak = 0;
             scoreElement.innerText = score;
+            comboStreakElement.innerText = comboStreak;
             drawBoard();
             generateSmartPieces();
         }
