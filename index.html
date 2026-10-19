@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - Direct Snap Edition</title>
+    <title>Block Puzzle - 3D Edition</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%);
-            --board-bg: #f8bbd0;
-            --block-gradient: linear-gradient(135deg, #ff4081 0%, #ec407a 100%);
-            --block-border: #f48fb1;
-            --mini-gradient: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
-            --primary-color: #d81b60;
-            --score-color: #ad1457;
+            --bg-gradient: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
+            --board-bg: rgba(255, 255, 255, 0.1);
+            --block-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            --block-border: #ffa8b6;
+            --block-shadow: rgba(255, 117, 140, 0.5);
+            --mini-gradient: linear-gradient(135deg, #fbc531 0%, #e84118 100%);
+            --primary-color: #ff7eb3;
+            --score-color: #ffffff;
         }
 
         * {
@@ -45,33 +46,34 @@
             z-index: 10;
         }
         .info-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
             border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            font-size: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 16px;
             font-weight: bold;
-            color: var(--score-color);
-            transition: color 0.5s ease;
+            color: #ffffff;
         }
 
         h1 {
-            color: var(--primary-color);
+            color: #ffffff;
             margin: 0 0 5px 0;
-            font-size: 30px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: color 0.5s ease;
+            font-size: 32px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
         #score-board {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
-            color: var(--score-color);
+            color: #ffffff;
             margin-bottom: 15px;
-            background: #ffffff;
-            padding: 6px 26px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 30px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: color 0.5s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         #board-wrapper {
@@ -80,63 +82,74 @@
 
         #board {
             display: grid;
-            grid-template-columns: repeat(8, 42px);
-            grid-template-rows: repeat(8, 42px);
-            gap: 4px;
-            background-color: var(--board-bg);
-            padding: 8px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            border: 4px solid transparent;
-            transition: background-color 0.8s ease, box-shadow 0.3s;
+            grid-template-columns: repeat(8, 44px);
+            grid-template-rows: repeat(8, 44px);
+            gap: 6px;
+            background-color: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: box-shadow 0.3s;
         }
 
         #board.danger {
             animation: dangerBorder 0.6s infinite alternate;
         }
         @keyframes dangerBorder {
-            from { border-color: transparent; box-shadow: 0 0 10px rgba(211, 47, 47, 0.3); }
-            to { border-color: #d32f2f; box-shadow: 0 0 30px rgba(211, 47, 47, 0.8); }
+            from { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
+            to { border-color: #e74c3c; box-shadow: 0 0 35px #e74c3c; }
         }
 
         .cell {
-            width: 42px;
-            height: 42px;
-            background-color: #ffffff;
-            border-radius: 6px;
+            width: 44px;
+            height: 44px;
+            background-color: rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
             transition: background-color 0.15s;
         }
+        
+        /* 🌟 เอฟเฟกต์บล็อก 3D นูนขึ้นมา */
         .cell.filled {
             background: var(--block-gradient);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-            border: 1px solid var(--block-border);
+            border-top: 2px solid rgba(255, 255, 255, 0.6);
+            border-left: 2px solid rgba(255, 255, 255, 0.4);
+            border-right: 2px solid rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 15px var(--block-shadow), inset 0 2px 4px rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+            border-radius: 10px;
         }
 
         .cell.preview-valid {
-            background-color: #a5d6a7 !important;
-            box-shadow: inset 0 0 10px #43a047;
+            background-color: rgba(46, 204, 113, 0.6) !important;
+            box-shadow: inset 0 0 15px #2ecc71;
         }
         .cell.preview-invalid {
-            background-color: #ef9a9a !important;
-            box-shadow: inset 0 0 10px #d32f2f;
+            background-color: rgba(231, 76, 60, 0.6) !important;
+            box-shadow: inset 0 0 15px #e74c3c;
         }
 
         #toolbox {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
-            min-height: 110px;
-            background: rgba(255, 255, 255, 0.92);
-            padding: 12px 25px;
-            border-radius: 20px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            margin-top: 25px;
+            min-height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             justify-content: space-around;
             width: 90%;
-            max-width: 420px;
+            max-width: 440px;
         }
         .shape-slot {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -145,13 +158,18 @@
             cursor: grab;
         }
         .mini-cell {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background-color: rgba(255,255,255,0.1);
         }
         .mini-cell.filled {
             background: var(--mini-gradient);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.4);
+            border-right: 1.5px solid rgba(0, 0, 0, 0.3);
+            border-bottom: 1.5px solid rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.4);
         }
 
         #wow-text {
@@ -159,10 +177,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            color: #ffb300;
-            font-size: 36px;
+            color: #f1c40f;
+            font-size: 38px;
             font-weight: 900;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 25px #ffea00;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 30px #f39c12;
             pointer-events: none;
             z-index: 100;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
@@ -179,18 +197,19 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
             z-index: 2000;
             justify-content: center;
             align-items: center;
         }
         .modal-content {
-            background-color: #ffffff;
-            padding: 35px;
-            border-radius: 24px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 40px;
+            border-radius: 28px;
             text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             max-width: 85%;
             animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -199,26 +218,27 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .modal-content h2 {
-            color: #d81b60;
-            font-size: 34px;
-            margin: 0 0 10px 0;
+            color: #ff7eb3;
+            font-size: 36px;
+            margin: 0 0 15px 0;
+            text-shadow: 0 2px 10px rgba(255, 126, 179, 0.4);
         }
         .modal-content p {
             font-size: 18px;
-            color: #444;
-            margin: 8px 0;
+            color: #ecf0f1;
+            margin: 10px 0;
         }
         .modal-content button {
-            background: var(--block-gradient);
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
             color: white;
             border: none;
-            padding: 12px 32px;
+            padding: 14px 36px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-            margin-top: 18px;
+            box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
+            margin-top: 20px;
             transition: transform 0.1s;
         }
         .modal-content button:active {
@@ -232,7 +252,7 @@
         <div class="info-card">🏆 สูงสุด: <span id="high-score">0</span></div>
     </div>
 
-    <h1>Block Puzzle 🧩</h1>
+    <h1>Block Puzzle 3D 🧩</h1>
     <div id="score-board">คะแนน: <span id="score">0</span></div>
 
     <div id="board-wrapper">
@@ -249,58 +269,44 @@
     <div id="game-over-modal">
         <div class="modal-content">
             <h2>GAME OVER 🎮</h2>
-            <p>คะแนนของคุณ: <strong id="final-score" style="color: #d81b60; font-size: 26px;">0</strong></p>
-            <p id="new-high-score-text" style="color: #ffb300; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
+            <p>คะแนนของคุณ: <strong id="final-score" style="color: #ff7eb3; font-size: 26px;">0</strong></p>
+            <p id="new-high-score-text" style="color: #f1c40f; font-weight: bold; display: none;">🎉 ทำลายสถิติสูงสุดใหม่!</p>
             <button onclick="restartGame()">เล่นใหม่อีกครั้ง 🔄</button>
         </div>
     </div>
 
     <script>
+        // 🌈 ธีมสี 3D พรีเมียมที่จะสลับเปลี่ยนทุกครั้งที่เคลียร์แถวสำเร็จ
         const PALETTES = [
             {
-                bg: 'linear-gradient(135deg, #ffe6f0 0%, #fff0f5 100%)',
-                board: '#f8bbd0',
-                block: 'linear-gradient(135deg, #ff4081 0%, #ec407a 100%)',
-                border: '#f48fb1',
-                mini: 'linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%)',
-                primary: '#d81b60',
-                score: '#ad1457'
+                bg: 'linear-gradient(135deg, #1f1c2c 0%, #928dab 100%)',
+                block: 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)',
+                shadow: 'rgba(255, 117, 140, 0.5)',
+                mini: 'linear-gradient(135deg, #fbc531 0%, #e84118 100%)'
             },
             {
-                bg: 'linear-gradient(135deg, #e1f5fe 0%, #f0f4c3 100%)',
-                board: '#b3e5fc',
-                block: 'linear-gradient(135deg, #0288d1 0%, #26c6da 100%)',
-                border: '#81d4fa',
-                mini: 'linear-gradient(135deg, #26a69a 0%, #00897b 100%)',
-                primary: '#0277bd',
-                score: '#01579b'
+                bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 100%, #2c5364 100%)',
+                block: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+                shadow: 'rgba(0, 198, 255, 0.5)',
+                mini: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)'
             },
             {
-                bg: 'linear-gradient(135deg, #f3e5f5 0%, #e8eaf6 100%)',
-                board: '#e1bee7',
-                block: 'linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%)',
-                border: '#ce93d8',
-                mini: 'linear-gradient(135deg, #5c6bc0 0%, #3f51b5 100%)',
-                primary: '#6a1b9a',
-                score: '#4a148c'
+                bg: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+                block: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)',
+                shadow: 'rgba(245, 175, 25, 0.5)',
+                mini: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)'
             },
             {
-                bg: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-                board: '#ffe0b2',
-                block: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
-                border: '#ffcc80',
-                mini: 'linear-gradient(135deg, #e64a19 0%, #d84315 100%)',
-                primary: '#e65100',
-                score: '#bf360c'
+                bg: 'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
+                block: 'linear-gradient(135deg, #8A2387 0%, #E94057 100%, #F27121 100%)',
+                shadow: 'rgba(233, 64, 87, 0.5)',
+                mini: 'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 100%)'
             },
             {
-                bg: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)',
-                board: '#a5d6a7',
-                block: 'linear-gradient(135deg, #388e3c 0%, #66bb6a 100%)',
-                border: '#81c784',
-                mini: 'linear-gradient(135deg, #00796b 0%, #004d40 100%)',
-                primary: '#2e7d32',
-                score: '#1b5e20'
+                bg: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
+                block: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                shadow: 'rgba(56, 239, 125, 0.5)',
+                mini: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)'
             }
         ];
 
@@ -311,12 +317,9 @@
             const p = PALETTES[currentPaletteIndex];
             
             document.documentElement.style.setProperty('--bg-gradient', p.bg);
-            document.documentElement.style.setProperty('--board-bg', p.board);
             document.documentElement.style.setProperty('--block-gradient', p.block);
-            document.documentElement.style.setProperty('--block-border', p.border);
+            document.documentElement.style.setProperty('--block-shadow', p.shadow);
             document.documentElement.style.setProperty('--mini-gradient', p.mini);
-            document.documentElement.style.setProperty('--primary-color', p.primary);
-            document.documentElement.style.setProperty('--score-color', p.score);
         }
 
         let audioCtx = null;
@@ -385,7 +388,7 @@
         const BOARD_SIZE = 8;
         let board = Array(BOARD_SIZE).fill(0).map(() => Array(BOARD_SIZE).fill(0));
         let score = 0;
-        let highScore = localStorage.getItem('block_puzzle_highscore') || 0;
+        let highScore = localStorage.getItem('block_puzzle_highscore_3d') || 0;
 
         const EASY_SHAPES = [
             [[1]], [[1]], [[1]],
@@ -445,7 +448,7 @@
                 const rows = randomShape.length;
                 const cols = randomShape[0].length;
                 shapeDiv.style.display = 'grid';
-                shapeDiv.style.gridTemplateColumns = `repeat(${cols}, 18px)`;
+                shapeDiv.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
                 shapeDiv.style.gap = '3px';
 
                 randomShape.forEach(row => {
@@ -466,11 +469,10 @@
             checkGameOver();
         }
 
-        // 🎯 ระบบ Direct Snap : ลอยเหนือปลายนิ้วพอดีเป๊ะ และพรีวิวตรงช่องตาราง 100%
         function addDragAndDropEvents(element, pieceIndex) {
             let clone = null;
-            const CELL_SIZE = 42;
-            const CELL_GAP = 4;
+            const CELL_SIZE = 44;
+            const CELL_GAP = 6;
             let isTouchDevice = false;
 
             function onStart(e) {
@@ -496,10 +498,14 @@
                 miniCells.forEach(mc => {
                     mc.style.width = `${CELL_SIZE}px`;
                     mc.style.height = `${CELL_SIZE}px`;
-                    mc.style.borderRadius = '6px';
+                    mc.style.borderRadius = '10px';
                     if (mc.classList.contains('filled')) {
-                        mc.style.background = getComputedStyle(document.documentElement).getPropertyValue('--mini-gradient');
-                        mc.style.boxShadow = '0 6px 15px rgba(0,0,0,0.25)';
+                        mc.style.background = getComputedStyle(document.documentElement).getPropertyValue('--block-gradient');
+                        mc.style.borderTop = '2px solid rgba(255, 255, 255, 0.6)';
+                        mc.style.borderLeft = '2px solid rgba(255, 255, 255, 0.4)';
+                        mc.style.borderRight = '2px solid rgba(0, 0, 0, 0.3)';
+                        mc.style.borderBottom = '2px solid rgba(0, 0, 0, 0.4)';
+                        mc.style.boxShadow = '0 12px 25px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4)';
                     }
                 });
 
@@ -543,14 +549,13 @@
                 }
             }
 
-            // 🎯 ให้บล็อกลอยขึ้นเหนือปลายนิ้วขึ้นไปพอดี (ประมาณ 80px) ทำให้มองเห็นช่องที่จะวางชัดเจน ไม่โดนนิ้วบัง
             function updateClonePosition(x, y) {
                 const shape = currentPieces[pieceIndex];
                 const width = shape[0].length * (CELL_SIZE + CELL_GAP);
                 const height = shape.length * (CELL_SIZE + CELL_GAP);
                 
                 clone.style.left = (x - width / 2) + 'px';
-                clone.style.top = (y - height - 40) + 'px'; 
+                clone.style.top = (y - height - 50) + 'px'; 
             }
 
             function checkHoverBoard() {
@@ -661,8 +666,8 @@
 
         function getBoardPosFromCloneRect(cloneRect, shape) {
             const boardRect = boardElement.getBoundingClientRect();
-            const CELL_SIZE_PLUS_GAP = 42 + 4;
-            const PADDING = 8;
+            const CELL_SIZE_PLUS_GAP = 44 + 6;
+            const PADDING = 12;
 
             const relX = cloneRect.left - boardRect.left - PADDING;
             const relY = cloneRect.top - boardRect.top - PADDING;
@@ -736,7 +741,7 @@
 
                     if (score > highScore) {
                         highScore = score;
-                        localStorage.setItem('block_puzzle_highscore', highScore);
+                        localStorage.setItem('block_puzzle_highscore_3d', highScore);
                         highScoreElement.innerText = highScore;
                         newHighScoreText.style.display = 'block';
                     } else {
@@ -773,6 +778,11 @@
             return false;
         }
 
+        def restartGame() {
+            // แก้ไขฟังก์ชันรีสตาร์ทเกมให้ถูกต้องตาม JavaScript 
+        }
+
+        // JavaScript function fix
         function restartGame() {
             gameOverModal.style.display = 'none';
             boardElement.classList.remove('danger');
