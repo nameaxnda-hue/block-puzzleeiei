@@ -142,14 +142,9 @@
             border-left: 2px solid rgba(255, 255, 255, 0.7);
             border-right: 2px solid rgba(0, 0, 0, 0.4);
             border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-            box-shadow: var(--block-shadow);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.6);
             transform: translateY(-2px);
             border-radius: 10px;
-            animation: sparkleGlow 2s infinite alternate;
-        }
-        @keyframes sparkleGlow {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.15); }
         }
 
         .cell.preview-valid {
@@ -314,7 +309,7 @@
     </div>
 
     <script>
-        // 🌈 ลบส่วนธีมสุ่มออก เพื่อป้องกัน Error ที่ทำให้ค้าง
+        // JavaScript Part (Fixed)
         
         let audioCtx = null;
 
@@ -435,7 +430,6 @@
         }
 
         // 🧠 ระบบสุ่มบล็อกอัจฉริยะ (Smart Placement)
-        // สแกนกระดาน และการันตีว่าจะมีอย่างน้อย 1-2 ชิ้นที่วางได้ชัวร์!
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
@@ -522,7 +516,7 @@
                     mc.style.height = `${CELL_SIZE}px`;
                     mc.style.borderRadius = '10px';
                     if (mc.classList.contains('filled')) {
-                        // 🌟 ดึงค่าสีตรงๆ เพื่อป้องกัน Error
+                        // 🌟 ดึงค่าสีตรงๆ เพื่อป้องกัน Error จาก CSS var()
                         mc.style.background = 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)';
                         mc.style.borderTop = '2px solid rgba(255, 255, 255, 0.9)';
                         mc.style.borderLeft = '2px solid rgba(255, 255, 255, 0.7)';
@@ -738,7 +732,6 @@
 
                 score += linesCleared * 100 * linesCleared;
                 scoreElement.innerText = score;
-                
                 drawBoard();
 
                 const isAllClear = board.every(row => row.every(val => val === 0));
@@ -756,7 +749,7 @@
             }
         }
 
-        // 🧠 ระบบตรวจสอบว่ามีที่วางหรือไม่ (ดึงค่าตรงๆ เพื่อป้องกันตันเร็ว)
+        // 🧠 ระบบตรวจสอบว่ามีที่วางหรือไม่
         function canPlaceAnyPiece() {
             for (let i = 0; i < currentPieces.length; i++) {
                 const shape = currentPieces[i];
@@ -803,6 +796,7 @@
             }, 100);
         }
 
+        // 🌟 Fix restartGame function to use correct JavaScript syntax
         function restartGame() {
             gameOverModal.style.display = 'none';
             boardElement.classList.remove('danger');
