@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Puzzle - 3D Crystal Sparkling Edition</title>
+    <title>Block Puzzle</title>
     <style>
         :root {
             --bg-gradient: radial-gradient(circle at center, #2b1055 0%, #7597de 100%);
             --board-bg: rgba(255, 255, 255, 0.08);
             --block-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-            --block-border: rgba(255, 255, 255, 0.8);
-            --block-shadow: 0 10px 25px rgba(255, 117, 140, 0.6), inset 0 2px 5px rgba(255,255,255,0.6);
             --mini-gradient: linear-gradient(135deg, #fbc531 0%, #e84118 100%);
             --primary-color: #ff7eb3;
         }
@@ -34,7 +32,7 @@
             transition: background 1s ease;
         }
 
-        /* 🌟 พื้นหลังบล็อก 3D ลอยไปลอยมาวิ้งๆ */
+        /* 🌟 พื้นหลังบล็อก 3D ลอยวิ้งๆ */
         .floating-bg-block {
             position: absolute;
             width: 40px;
@@ -134,21 +132,16 @@
             transition: background-color 0.15s;
         }
         
-        /* 🌟 บล็อก 3D คริสตัลวิ้งวับ */
+        /* 🌟 บล็อก 3D คริสตัล นูนสวยงาม */
         .cell.filled {
             background: var(--block-gradient);
             border-top: 2px solid rgba(255, 255, 255, 0.9);
             border-left: 2px solid rgba(255, 255, 255, 0.7);
             border-right: 2px solid rgba(0, 0, 0, 0.4);
             border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-            box-shadow: var(--block-shadow);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.6);
             transform: translateY(-2px);
             border-radius: 10px;
-            animation: sparkleGlow 2s infinite alternate;
-        }
-        @keyframes sparkleGlow {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.15); }
         }
 
         .cell.preview-valid {
@@ -277,7 +270,6 @@
 </head>
 <body>
 
-    <!-- สร้างฉากหลังบล็อก 3D ลอยวิ้งๆ -->
     <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
     <div class="floating-bg-block" style="left: 30%; animation-duration: 14s; animation-delay: 2s;"></div>
     <div class="floating-bg-block" style="left: 55%; animation-duration: 11s; animation-delay: 4s;"></div>
@@ -288,7 +280,7 @@
         <div class="info-card">🏆 สูงสุด: <span id="high-score">0</span></div>
     </div>
 
-    <h1>Block Puzzle 3D ✨</h1>
+    <h1>Block Puzzle 🧩</h1>
     <div id="score-board">คะแนน: <span id="score">0</span></div>
 
     <div id="board-wrapper">
@@ -312,40 +304,34 @@
     </div>
 
     <script>
-        // 🌈 ธีมสีคริสตัล 3D วิ้งวับ ที่จะเปลี่ยนสีเฉพาะตอนเคลียร์ตารางเกลี้ยง (All Clear) เท่านั้น!
         const PALETTES = [
             {
                 bg: 'radial-gradient(circle at center, #2b1055 0%, #7597de 100%)',
                 block: 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)',
-                shadow: '0 10px 25px rgba(255, 117, 140, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
                 mini: 'linear-gradient(135deg, #fbc531 0%, #e84118 100%)',
                 primary: '#ff7eb3'
             },
             {
                 bg: 'radial-gradient(circle at center, #0f2027 0%, #203a43 50%, #2c5364 100%)',
                 block: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
-                shadow: '0 10px 25px rgba(0, 198, 255, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
                 mini: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)',
                 primary: '#00c6ff'
             },
             {
                 bg: 'radial-gradient(circle at center, #141e30 0%, #243b55 100%)',
                 block: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)',
-                shadow: '0 10px 25px rgba(245, 175, 25, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
                 mini: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)',
                 primary: '#f5af19'
             },
             {
                 bg: 'radial-gradient(circle at center, #41295a 0%, #2F0743 100%)',
                 block: 'linear-gradient(135deg, #8A2387 0%, #E94057 50%, #F27121 100%)',
-                shadow: '0 10px 25px rgba(233, 64, 87, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
                 mini: 'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 100%)',
                 primary: '#E94057'
             },
             {
                 bg: 'radial-gradient(circle at center, #0b486b 0%, #f56217 100%)',
                 block: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-                shadow: '0 10px 25px rgba(56, 239, 125, 0.6), inset 0 2px 5px rgba(255,255,255,0.6)',
                 mini: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)',
                 primary: '#38ef7d'
             }
@@ -357,7 +343,6 @@
             const p = PALETTES[currentPaletteIndex];
             document.documentElement.style.setProperty('--bg-gradient', p.bg);
             document.documentElement.style.setProperty('--block-gradient', p.block);
-            document.documentElement.style.setProperty('--block-shadow', p.shadow);
             document.documentElement.style.setProperty('--mini-gradient', p.mini);
             document.documentElement.style.setProperty('--primary-color', p.primary);
         }
@@ -430,7 +415,6 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
 
-        // 🧠 ระบบสุ่มบล็อกอัจฉริยะ (Smart Assist Shapes) สลับชิ้นเล็กชิ้นใหญ่ให้เล่นง่ายเหมือนในแอปเกมจริง
         const GAME_SHAPES = [
             [[1]], [[1, 1]], [[1], [1]], [[1, 1, 1]], [[1], [1], [1]],
             [[1, 1], [1, 1]], [[1, 1, 1, 1]], [[1], [1], [1], [1]],
@@ -756,7 +740,6 @@
                 scoreElement.innerText = score;
                 drawBoard();
 
-                // 🌟 เงื่อนไขเปลี่ยนสี: ต้องเคลียร์จนกระดานว่างเปล่าทั้งหมด (All Clear) เท่านั้น ถึงจะเปลี่ยนสีธีมวิ้งๆ ใหม่!
                 const isAllClear = board.every(row => row.every(val => val === 0));
                 
                 if (isAllClear) {
