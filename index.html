@@ -98,19 +98,19 @@
             transition: all 0.3s ease;
         }
 
-        /* 🚨 กรอบแดงวิบวับเตือนภัยตอนสุ่มแล้ววางไม่ลง เด่นชัดสะใจ! */
+        /* 🚨 ขอบแดงวิบวับเด่นชัดสะใจ บังคับแสดงผลแน่นอน! */
         #board.danger {
             border-color: #ff3838 !important;
-            animation: superDangerGlow 0.5s infinite alternate ease-in-out;
+            animation: superDangerGlow 0.4s infinite alternate ease-in-out;
         }
         @keyframes superDangerGlow {
             0% {
-                box-shadow: 0 0 15px rgba(255, 56, 56, 0.5), inset 0 0 10px rgba(255, 56, 56, 0.4);
+                box-shadow: 0 0 15px rgba(255, 56, 56, 0.6), inset 0 0 10px rgba(255, 56, 56, 0.4);
                 filter: brightness(1);
             }
             100% {
-                box-shadow: 0 0 45px rgba(255, 56, 56, 1), inset 0 0 25px rgba(255, 56, 56, 0.8);
-                filter: brightness(1.25);
+                box-shadow: 0 0 50px rgba(255, 56, 56, 1), inset 0 0 30px rgba(255, 56, 56, 0.9);
+                filter: brightness(1.3);
             }
         }
 
@@ -405,7 +405,6 @@
             }
         }
 
-        // ตรวจสอบว่าบล็อกที่เหลืออยู่ สามารถวางลงบนกระดานได้หรือไม่
         function canPlaceAnyPiece() {
             for (let i = 0; i < currentPieces.length; i++) {
                 const shape = currentPieces[i];
@@ -482,14 +481,29 @@
                 addDragAndDropEvents(shapeDiv, i);
             }
 
-            // 🚨 เช็คทันทีหลังสุ่มบล็อกเสร็จ ถ้าไม่มีชิ้นไหนวางลงได้เลย ให้ขึ้นขอบแดงวิบวับทันที!
+            // 🚨 เช็คทันทีหลังสุ่มเสร็จ ถ้าวางไม่ลง สั่งเปิดขอบแดงเตือนภัยทันทีก่อนเด้ง Game Over!
             setTimeout(() => {
-                if (!canPlaceAnyPiece()) {
-                    boardElement.classList.add('danger');
+                const hasPiece = currentPieces.some(p => p !== null);
+                if (hasPiece && !canPlaceAnyPiece()) {
+                    boardElement.classList.add('danger'); // สั่งเปิดขอบแดงวิบวับค้างไว้ทันที!
+                    
+                    // หน่วงเวลา 0.6 วินาทีให้เห็นขอบแดงก่อน ค่อยเด้งหน้าต่าง Game Over
+                    setTimeout(() => {
+                        playSound('gameover');
+                        if (score > highScore) {
+                            highScore = score;
+                            localStorage.setItem('block_puzzle_highscore_crystal', highScore);
+                            highScoreElement.innerText = highScore;
+                            newHighScoreText.style.display = 'block';
+                        } else {
+                            newHighScoreText.style.display = 'none';
+                        }
+                        finalScoreElement.innerText = score;
+                        gameOverModal.style.display = 'flex';
+                    }, 600);
                 } else {
                     boardElement.classList.remove('danger');
                 }
-                checkGameOver();
             }, 50);
         }
 
@@ -663,18 +677,28 @@
 
                         checkAndClearLines();
                         
-                        // ถ้าวางบล็อกหมดทุกชิ้นในชุดแล้ว สุ่มชุดใหม่
                         if (currentPieces.every(p => p === null)) {
-                            boardElement.classList.remove('danger'); // ล้างกรอบแดงตอนสุ่มชุดใหม่
+                            boardElement.classList.remove('danger');
                             generateSmartPieces(); 
                         } else {
-                            // ถ้ายังเหลือบล็อกบนถาด เช็คดูว่าชิ้นที่เหลือยังวางลงกระดานได้ไหม
                             if (!canPlaceAnyPiece()) {
                                 boardElement.classList.add('danger');
+                                setTimeout(() => {
+                                    playSound('gameover');
+                                    if (score > highScore) {
+                                        highScore = score;
+                                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
+                                        highScoreElement.innerText = highScore;
+                                        newHighScoreText.style.display = 'block';
+                                    } else {
+                                        newHighScoreText.style.display = 'none';
+                                    }
+                                    finalScoreElement.innerText = score;
+                                    gameOverModal.style.display = 'flex';
+                                }, 600);
                             } else {
                                 boardElement.classList.remove('danger');
                             }
-                            checkGameOver();
                         }
                         placed = true;
                     }
@@ -760,27 +784,6 @@
                     playSound('clear');
                 }
             }
-        }
-
-        function checkGameOver() {
-            setTimeout(() => {
-                const hasPiece = currentPieces.some(p => p !== null);
-                if (hasPiece && !canPlaceAnyPiece()) {
-                    playSound('gameover');
-
-                    if (score > highScore) {
-                        highScore = score;
-                        localStorage.setItem('block_puzzle_highscore_crystal', highScore);
-                        highScoreElement.innerText = highScore;
-                        newHighScoreText.style.display = 'block';
-                    } else {
-                        newHighScoreText.style.display = 'none';
-                    }
-
-                    finalScoreElement.innerText = score;
-                    gameOverModal.style.display = 'flex';
-                }
-            }, 100);
         }
 
         function restartGame() {
