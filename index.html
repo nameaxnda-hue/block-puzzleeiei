@@ -30,10 +30,9 @@
             touch-action: none;
             overflow: hidden;
             padding: 10px;
-            position: relative;
         }
 
-        /* 🌟 บล็อกลอยพุ่งขึ้นมาจากล่างขึ้นบนแบบดั้งเดิม เห็นชัดทั้งมือถือและคอม */
+        /* 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม 100% */
         .floating-bg-block {
             position: absolute;
             width: 45px;
@@ -42,15 +41,15 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
-            animation: floatFromBottom 10s infinite linear;
+            animation: floatAround 12s infinite linear;
             z-index: 1;
             pointer-events: none;
         }
-        @keyframes floatFromBottom {
-            0% { transform: translateY(110vh) rotate(0deg) scale(0.8); opacity: 0; }
+        @keyframes floatAround {
+            0% { transform: translateY(105vh) rotate(0deg) scale(0.8); opacity: 0; }
             20% { opacity: 0.5; }
             80% { opacity: 0.5; }
-            100% { transform: translateY(-15vh) rotate(360deg) scale(1.2); opacity: 0; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
         }
 
         #game-wrapper {
@@ -271,11 +270,12 @@
 </head>
 <body>
 
-    <!-- 🌟 บล็อกลอยพุ่งขึ้นมาจากด้านล่างแบบดั้งเดิม -->
-    <div class="floating-bg-block" style="left: 10%; animation-duration: 9s; animation-delay: 0s;"></div>
-    <div class="floating-bg-block" style="left: 30%; animation-duration: 12s; animation-delay: 3s;"></div>
-    <div class="floating-bg-block" style="left: 70%; animation-duration: 10s; animation-delay: 1s;"></div>
-    <div class="floating-bg-block" style="left: 85%; animation-duration: 14s; animation-delay: 4s;"></div>
+    <!-- 🌟 บล็อกลอยพุ่งขึ้นจากด้านล่างแบบดั้งเดิม -->
+    <div class="floating-bg-block" style="left: 10%; animation-duration: 10s; animation-delay: 0s;"></div>
+    <div class="floating-bg-block" style="left: 25%; animation-duration: 14s; animation-delay: 3s;"></div>
+    <div class="floating-bg-block" style="left: 50%; animation-duration: 11s; animation-delay: 1s;"></div>
+    <div class="floating-bg-block" style="left: 75%; animation-duration: 15s; animation-delay: 4s;"></div>
+    <div class="floating-bg-block" style="left: 90%; animation-duration: 13s; animation-delay: 2s;"></div>
 
     <div id="game-wrapper">
         <div id="top-panel">
@@ -384,18 +384,31 @@
         let score = 0;
         let highScore = localStorage.getItem('block_puzzle_highscore_crystal') || 0;
 
-        // รูปทรงบล็อกหลากหลาย ทั้งแบบเล็กเดี่ยวและบล็อกยาวช่วยเคลียร์พื้นที่โล่งง่ายๆ
-        const GAME_SHAPES = [
-            [[1]], 
-            [[1, 1]], [[1], [1]], 
-            [[1, 1, 1]], [[1], [1], [1]], 
+        // 🧩 คลังบล็อกสไตล์ Block Blast (เน้นตัว L, ตัว J, บล็อกยาว, 3x3 และตัดบล็อกจิ๋ว 1 ช่องออกเพื่อความสมจริง)
+        const BLOCK_BLAST_SHAPES = [
+            // 1. บล็อกคู่แนวนอน/แนวตั้ง
+            [[1, 1]], 
+            [[1], [1]], 
+            // 2. บล็อก 3 ช่อง
+            [[1, 1, 1]], 
+            [[1], [1], [1]], 
+            // 3. สี่เหลี่ยมจัตุรัส 2x2 และ 3x3
             [[1, 1], [1, 1]], 
+            [[1, 1, 1], [1, 1, 1], [1, 1, 1]], 
+            // 4. บล็อกยาว 4-5 ช่อง
             [[1, 1, 1, 1]], [[1], [1], [1], [1]], 
-            [[1, 1, 1, 1, 1]], [[1], [1], [1], [1], [1]], // บล็อกยาวช่วยเคลียร์แถว
-            [[1, 0], [1, 1]], [[0, 1], [1, 1]], 
+            [[1, 1, 1, 1, 1]], [[1], [1], [1], [1], [1]], 
+            // 5. ตัว L และตัว J ยอดฮิต (รวมถึงตัว L กลับหัวแบบที่ชอบ)
+            [[1, 0], [1, 0], [1, 1]], // L ยาว
+            [[0, 1], [0, 1], [1, 1]], // J ยาว
+            [[1, 1], [1, 0], [1, 0]], 
+            [[1, 1], [0, 1], [0, 1]],
+            [[1, 0], [1, 1]], 
+            [[0, 1], [1, 1]], 
+            // 6. บล็อกมุมฉาก / ตัว T / ซิกแซก
             [[1, 1, 1], [0, 1, 0]], 
-            [[1, 1, 0], [0, 1, 1]], [[0, 1, 1], [1, 1, 0]], 
-            [[1, 1, 1], [1, 1, 1], [1, 1, 1]] // บล็อก 3x3
+            [[1, 1, 0], [0, 1, 1]], 
+            [[0, 1, 1], [1, 1, 0]]
         ];
 
         let currentPieces = [null, null, null];
@@ -461,7 +474,7 @@
             return false;
         }
 
-        // ระบบสุ่มบล็อกอัจฉริยะ เพิ่มโอกาสสุ่มชิ้นเล็กและบล็อกเคลียร์แถวให้เล่นสนุกเหมือนเกมบล็อกเบส
+        // 🎲 ระบบสุ่มบล็อกสไตล์ Block Blast (เล่นง่าย ช่วงแรกเน้นรูปทรงต่อสะดวก เคลียร์พื้นที่โล่งง่าย)
         function generateSmartPieces() {
             const placedPieces = [null, null, null];
             
@@ -472,16 +485,16 @@
                 }
             }
 
-            // ถ้าพื้นที่ว่างเยอะ สุ่มบล็อกหลากหลาย รวมถึงบล็อกยาวช่วยทำคะแนน
             for (let i = 0; i < 3; i++) {
-                if (freeSlots.length > 40) {
-                    const randIndex = Math.floor(Math.random() * (GAME_SHAPES.length - 2));
-                    placedPieces[i] = GAME_SHAPES[randIndex];
+                if (freeSlots.length > 45) {
+                    // ช่วงกระดานโล่ง สุ่มบล็อกทรงมาตรฐานและตัว L / J สนุกๆ
+                    const randIndex = Math.floor(Math.random() * BLOCK_BLAST_SHAPES.length);
+                    placedPieces[i] = BLOCK_BLAST_SHAPES[randIndex];
                 } else {
-                    // ถ้าเริ่มแคบ เน้นสุ่มบล็อกขนาดเล็กและกลางเพื่อให้ผู้เล่นแก้เกมเคลียร์พื้นที่ได้ง่ายขึ้น
-                    const smallShapes = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13];
-                    const chosenIdx = smallShapes[Math.floor(Math.random() * smallShapes.length)];
-                    placedPieces[i] = GAME_SHAPES[chosenIdx];
+                    // ช่วงกระดานเริ่มแคบ เน้นสุ่มบล็อกขนาดเล็กและปานกลาง เพื่อให้ผู้เล่นแก้เกมเคลียร์แถวได้ง่ายขึ้น
+                    const easyShapes = [0, 1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14, 15];
+                    const chosenIdx = easyShapes[Math.floor(Math.random() * easyShapes.length)];
+                    placedPieces[i] = BLOCK_BLAST_SHAPES[chosenIdx];
                 }
             }
 
@@ -515,7 +528,7 @@
                 addDragAndDropEvents(shapeDiv, i);
             }
 
-            // 🚨 เช็คภาวะวิกฤติทันทีหลังสุ่มบล็อก
+            // 🚨 ตรวจสอบภาวะวิกฤติทันทีหลังสุ่มบล็อกเสร็จ
             setTimeout(() => {
                 const hasPiece = currentPieces.some(p => p !== null);
                 if (hasPiece && !canPlaceAnyPiece()) {
